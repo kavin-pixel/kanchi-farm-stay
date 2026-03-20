@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guest Reviews | Kanchi Farm Stay</title>
+    <link rel="icon" type="image/svg+xml" href="assets/images/favicon.ico">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- Navbar Placeholder -->
+    <div id="navbar-placeholder"></div>
+
+    <div class="reviews-page">
+        <section class="reviews-header">
+            <div class="container">
+                <h1>Guest Reviews</h1>
+                <p>See what our guests are saying about their stay at Kanchi Farm Stay</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="container">
+                <!-- Filter buttons -->
+                <!-- Note: Basic filter implementation in script.js currently renders all. 
+                      To make filtering responsive without React, we can add simple event listeners.
+                      For now, script.js loads all. I'll add simple filter logic to script.js in next step if needed,
+                      or just let it show all. 
+                      Let's implement the filter buttons to work.
+                 -->
+                <div class="filter-buttons">
+                    <button class="filter-btn active" onclick="filterReviews('all')">All Reviews</button>
+                    <button class="filter-btn" onclick="filterReviews('google')">Google</button>
+                    <button class="filter-btn" onclick="filterReviews('airbnb')">Airbnb</button>
+                    <button class="filter-btn" onclick="filterReviews('booking')">Booking.com</button>
+                </div>
+
+                <!-- Reviews grid -->
+                <div id="reviews-grid" class="reviews-grid-page">
+                    <!-- Injected by script -->
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer Placeholder -->
+    <div id="footer-placeholder"></div>
+
+    <!-- Scripts -->
+    <script src="script.js?v=2"></script>
+    <script>
+        // Simple inline script or added to script.js for filtering
+        // I will add filterReviews to script.js
+    </script>
+</body>
+
+</html>

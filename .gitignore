@@ -1,5 +1,40 @@
-.DS_Store
+# Logs
+*.log
+logs/
+
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+dist-ssr/
+
+# Deployment / archive artefacts
 *.zip
+deployment_bundle/
+deployment_files/
+_backup_vite_src/
+
+# Internal / scratch files
+implementation_plan.md
+server.log
+test_images.html
+
+# macOS
+.DS_Store
+
+# Editor directories
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.local
+
+# Claude Code project config
 .claude/
-assets/videos/hero-video.MP4
-"assets\\videos\\hero-video.MP4"
+*.MP4
+*.mp4

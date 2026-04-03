@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Room Details | Kanchi Farm Stay</title>
+    <meta name="description" content="View room details, amenities, availability and book your stay at Kanchi Farm Stay. Multiple booking options including direct payment, Airbnb and Booking.com.">
     <link rel="icon" type="image/svg+xml" href="assets/images/favicon.ico">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -38,6 +39,9 @@
                         <ul id="room-amenities" class="amenities-list">
                             <!-- Injected by script -->
                         </ul>
+
+                        <!-- Availability Calendar -->
+                        <div id="availability-calendar" style="margin-top:2rem;"></div>
 
                         <div class="room-gallery">
                             <h3>Gallery</h3>
@@ -74,16 +78,6 @@
                                         style="font-size: 0.8rem; display: block; margin-bottom: 0.25rem;">Check-out</label>
                                     <input type="date" id="room-checkout" class="form-input"
                                         style="width: 100%; box-sizing: border-box;">
-                                </div>
-                            </div>
-                            
-                            <div id="guest-count-container" style="display: none; margin-top: 1rem;">
-                                <div class="form-group">
-                                    <label for="room-guests"
-                                        style="font-size: 0.8rem; display: block; margin-bottom: 0.25rem;">Total Guests</label>
-                                    <input type="number" id="room-guests" class="form-input" min="1" max="25" value="10"
-                                        style="width: 100%; box-sizing: border-box;">
-                                    <small style="color: #666; font-size: 0.75rem;">₹8000 for up to 10 guests. ₹1000 per extra guest. Maximum 25 guests.</small>
                                 </div>
                             </div>
 
@@ -148,7 +142,7 @@
 
     <!-- Scripts -->
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-    <script src="script.js?v=2"></script>
+    <script src="script.js?v=4"></script>
 </body>
 
 </html>

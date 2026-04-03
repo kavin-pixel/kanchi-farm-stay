@@ -202,6 +202,7 @@ function renderFooter() {
                 <ul>
                     <li><a href="index.html">Home</a></li>
                     <li><a href="accommodations.html">Accommodations</a></li>
+                    <li><a href="index.html#activities">Activities</a></li>
                     <li><a href="gallery.html">Gallery</a></li>
                     <li><a href="reviews.html">Reviews</a></li>
                     <li><a href="contact.html">Contact Us</a></li>
@@ -245,9 +246,10 @@ function loadRoomDetails() {
     const room = rooms.find(r => r.id === roomId);
 
     if (room) {
-        // Hero Image
+        // Hero Image / Slider
         const heroImg = document.getElementById('room-hero-img');
         if (heroImg) heroImg.src = room.image;
+        if (room.images && room.images.length > 1) initRoomSlider(room.images);
 
         // Title
         const title = document.getElementById('room-title');
@@ -291,6 +293,9 @@ function loadRoomDetails() {
 
         const bookingBtn = document.getElementById('booking-btn');
         if (bookingBtn) bookingBtn.href = room.bookingUrl;
+
+        // Load availability calendar
+        loadAvailabilityCalendar(room.id);
 
         // Razorpay Date pickers and dynamic price
         const checkinInput = document.getElementById('room-checkin');
@@ -407,9 +412,28 @@ function loadRoomDetails() {
                         name: "Kanchi Farm Stay",
                         description: `Payment for ${room.name} (${days} night${days > 1 ? 's' : ''})`,
                         image: window.location.origin + "/assets/images/logo.png",
-                        order_id: orderData.id, // The order ID from your backend
+                        order_id: orderData.id,
                         handler: function (response) {
-                            alert(`Payment Successful!\nPayment ID: ${response.razorpay_payment_id}\nOrder ID: ${response.razorpay_order_id}\nRoom: ${room.name}\nCheck-in: ${checkinInput.value}\nCheck-out: ${checkoutInput.value}\nGuest: ${guestName}\nThank you for booking with Kanchi Farm Stay.`);
+                            // Confirm booking in database and trigger WhatsApp notification
+                            fetch('confirm_booking.php', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    paymentId: response.razorpay_payment_id,
+                                    orderId:   response.razorpay_order_id,
+                                    roomId:    room.id,
+                                    roomName:  room.name,
+                                    checkIn:   checkinInput.value,
+                                    checkOut:  checkoutInput.value,
+                                    guestName: guestName,
+                                    guestEmail: guestEmail,
+                                    guestPhone: guestPhone,
+                                    amount:    currentTotal,
+                                    days:      days
+                                })
+                            }).catch(() => {}); // fire-and-forget
+                            alert(`Payment Successful!\nPayment ID: ${response.razorpay_payment_id}\nRoom: ${room.name}\nCheck-in: ${checkinInput.value}\nCheck-out: ${checkoutInput.value}\nGuest: ${guestName}\nThank you for booking with Kanchi Farm Stay!`);
+                            loadAvailabilityCalendar(room.id); // refresh calendar
                         },
                         prefill: {
                             name: guestName,
@@ -706,7 +730,163 @@ document.addEventListener('DOMContentLoaded', () => {
     if (path.includes('gallery.html')) {
         renderGalleryGrid('all');
     }
+
+    renderWhatsAppButton();
 });
+
+// COMPONENT: Floating WhatsApp Button
+function renderWhatsAppButton() {
+    const a = document.createElement('a');
+    a.href = 'https://wa.me/916383726094';
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    a.className = 'whatsapp-float';
+    a.setAttribute('aria-label', 'Chat on WhatsApp');
+    a.innerHTML = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+    </svg>`;
+    document.body.appendChild(a);
+}
+
+// LOGIC: Room Image Slider
+function initRoomSlider(images) {
+    const hero = document.querySelector('.room-hero');
+    if (!hero || !images || images.length <= 1) return;
+
+    // Build slider
+    const slider = document.createElement('div');
+    slider.className = 'room-hero-slider';
+    slider.id = 'room-hero-slider';
+
+    images.forEach(src => {
+        const img = document.createElement('img');
+        img.src = src;
+        img.className = 'room-hero-slide';
+        img.alt = 'Room photo';
+        slider.appendChild(img);
+    });
+
+    // Replace the static hero img
+    const existingImg = hero.querySelector('#room-hero-img');
+    if (existingImg) existingImg.replaceWith(slider);
+
+    // Prev / Next buttons
+    const prevBtn = document.createElement('button');
+    prevBtn.className = 'slider-btn slider-btn-prev';
+    prevBtn.innerHTML = '&#8249;';
+    prevBtn.setAttribute('aria-label', 'Previous photo');
+
+    const nextBtn = document.createElement('button');
+    nextBtn.className = 'slider-btn slider-btn-next';
+    nextBtn.innerHTML = '&#8250;';
+    nextBtn.setAttribute('aria-label', 'Next photo');
+
+    // Dots
+    const dotsEl = document.createElement('div');
+    dotsEl.className = 'slider-dots';
+    images.forEach((_, i) => {
+        const dot = document.createElement('button');
+        dot.className = 'slider-dot' + (i === 0 ? ' active' : '');
+        dot.setAttribute('aria-label', `Go to photo ${i + 1}`);
+        dot.addEventListener('click', () => goToSlide(i));
+        dotsEl.appendChild(dot);
+    });
+
+    hero.appendChild(prevBtn);
+    hero.appendChild(nextBtn);
+    hero.appendChild(dotsEl);
+
+    let current = 0;
+
+    function goToSlide(n) {
+        current = (n + images.length) % images.length;
+        slider.style.transform = `translateX(-${current * 100}%)`;
+        dotsEl.querySelectorAll('.slider-dot').forEach((d, i) => {
+            d.classList.toggle('active', i === current);
+        });
+    }
+
+    prevBtn.addEventListener('click', () => goToSlide(current - 1));
+    nextBtn.addEventListener('click', () => goToSlide(current + 1));
+
+    // Auto-advance every 5s
+    setInterval(() => goToSlide(current + 1), 5000);
+}
+
+// LOGIC: Availability Calendar (room-details page)
+function loadAvailabilityCalendar(roomId) {
+    const container = document.getElementById('availability-calendar');
+    if (!container) return;
+
+    fetch(`channel-manager/availability-api.php?room=${roomId}`)
+        .then(r => r.json())
+        .then(data => {
+            if (data.error) { container.innerHTML = ''; return; }
+            renderAvailabilityCalendar(container, data.blocked || []);
+        })
+        .catch(() => { container.innerHTML = ''; });
+}
+
+function renderAvailabilityCalendar(container, blockedRanges) {
+    // Build a Set of blocked date strings for fast lookup
+    function buildBlockedSet(ranges) {
+        const set = new Set();
+        ranges.forEach(([ci, co]) => {
+            let cur = new Date(ci + 'T00:00:00');
+            const end = new Date(co + 'T00:00:00');
+            while (cur < end) {
+                set.add(cur.toISOString().split('T')[0]);
+                cur.setDate(cur.getDate() + 1);
+            }
+        });
+        return set;
+    }
+
+    const blocked = buildBlockedSet(blockedRanges);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    let html = `
+      <div class="avail-cal-wrap">
+        <h3 style="margin-bottom:1rem;font-size:1rem;">Availability</h3>
+        <div class="avail-legend">
+          <span class="avail-dot avail-free"></span> Available
+          <span class="avail-dot avail-blocked" style="margin-left:1rem;"></span> Booked
+        </div>
+    `;
+
+    // Show 3 months starting from today
+    for (let m = 0; m < 3; m++) {
+        const d = new Date(today.getFullYear(), today.getMonth() + m, 1);
+        const year = d.getFullYear();
+        const month = d.getMonth();
+        const monthName = d.toLocaleString('default', { month: 'long', year: 'numeric' });
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const firstDow = d.getDay(); // 0=Sun
+
+        html += `<div class="avail-month"><div class="avail-month-title">${monthName}</div>`;
+        html += '<div class="avail-grid">';
+        ['Su','Mo','Tu','We','Th','Fr','Sa'].forEach(dh => {
+            html += `<div class="avail-day-hdr">${dh}</div>`;
+        });
+        for (let i = 0; i < firstDow; i++) html += '<div></div>';
+        for (let day = 1; day <= daysInMonth; day++) {
+            const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+            const dt = new Date(year, month, day);
+            const isPast = dt < today;
+            const isBlocked = blocked.has(dateStr);
+            let cls = 'avail-day';
+            if (isPast)    cls += ' avail-past';
+            else if (isBlocked) cls += ' avail-blocked-day';
+            else           cls += ' avail-free-day';
+            html += `<div class="${cls}">${day}</div>`;
+        }
+        html += '</div></div>'; // avail-grid + avail-month
+    }
+
+    html += '</div>'; // avail-cal-wrap
+    container.innerHTML = html;
+}
 
 // LOGIC: Accommodations Page
 function renderAccommodations() {

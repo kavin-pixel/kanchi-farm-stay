@@ -593,16 +593,12 @@ button {
 
 /* Home Rooms Teaser */
 .rooms-grid {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
     gap: 2.5rem;
 }
 
 .room-card-preview {
-    flex: 0 0 calc(33.333% - 1.67rem);
-    min-width: 280px;
-    max-width: 380px;
     background: white;
     border-radius: var(--radius-lg);
     overflow: hidden;
@@ -1418,4 +1414,134 @@ textarea:focus {
 
 .lightbox-close:hover {
     color: var(--color-accent);
+}
+
+.lightbox-prev,
+.lightbox-next {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    color: white;
+    font-size: 4rem;
+    cursor: pointer;
+    padding: 0 1rem;
+    line-height: 1;
+    font-family: sans-serif;
+    user-select: none;
+    transition: color 0.2s, transform 0.2s;
+    z-index: 10;
+}
+
+.lightbox-prev {
+    left: 10px;
+}
+
+.lightbox-next {
+    right: 10px;
+}
+
+.lightbox-prev:hover,
+.lightbox-next:hover {
+    color: var(--color-secondary);
+    transform: translateY(-50%) scale(1.1);
+}
+
+.lightbox-caption {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: white;
+    font-size: 1rem;
+    font-weight: 500;
+    text-align: center;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 0.4rem 1.2rem;
+    border-radius: 100px;
+    white-space: nowrap;
+    max-width: 80%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.lightbox-counter {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+    font-family: var(--font-body);
+}
+
+/* Gallery Filters */
+.gallery-filters {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 2.5rem;
+}
+
+.gallery-filter-btn {
+    padding: 0.5rem 1.4rem;
+    border: 2px solid var(--color-primary);
+    background: transparent;
+    color: var(--color-primary);
+    border-radius: 100px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    font-family: var(--font-body);
+}
+
+.gallery-filter-btn:hover,
+.gallery-filter-btn.active {
+    background: var(--color-primary);
+    color: white;
+}
+
+/* Activities Section */
+.activities-section {
+    background: var(--color-bg);
+}
+
+.activities-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.activity-card {
+    background: white;
+    border-radius: var(--radius-lg);
+    padding: 2rem 1.75rem;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--color-border);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.activity-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+}
+
+.activity-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    line-height: 1;
+}
+
+.activity-card h3 {
+    font-size: 1.2rem;
+    color: var(--color-primary);
+    margin-bottom: 0.75rem;
+}
+
+.activity-card p {
+    color: var(--color-text-light);
+    font-size: 0.95rem;
+    line-height: 1.65;
+    margin: 0;
 }

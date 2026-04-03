@@ -24,173 +24,17 @@
 
         <section class="section">
             <div class="container">
-                <div class="gallery-grid-page" id="gallery-grid">
-                    <!-- 
-                        We can either inject these via JS or hardcode them here.
-                        Hardcoding is robust for static reference.
-                        JS would be cleaner if we had the list in script.js.
-                        Since I didn't add the full list to script.js yet, I will inline them here based on the original file
-                        but assume standard path 'assets/images/...'
-                     -->
-                    <div class="gallery-item" onclick="openLightbox('assets/images/wooden-villa-swing-3.jpg')">
-                        <img src="assets/images/wooden-villa-swing-3.jpg" alt="Wooden Villa Beds" loading="lazy">
-                        <div class="image-overlay"><span>Wooden Villa Beds</span></div>
-                    </div>
-                    <div class="gallery-item" onclick="openLightbox('assets/images/wooden-villa-swing-4.jpg')">
-                        <img src="assets/images/wooden-villa-swing-4.jpg" alt="Wooden Villa Living Area" loading="lazy">
-                        <div class="image-overlay"><span>Wooden Villa Living Area</span></div>
-                    </div>
-                    <div class="gallery-item" onclick="openLightbox('assets/images/wooden-villa-swing-5.jpg')">
-                        <img src="assets/images/wooden-villa-swing-5.jpg" alt="Wooden Villa Room Frame" loading="lazy">
-                        <div class="image-overlay"><span>Wooden Villa Room Frame</span></div>
-                    </div>
-                    <div class="gallery-item" onclick="openLightbox('assets/images/wooden-villa-bathroom.png')">
-                        <img src="assets/images/wooden-villa-bathroom.png" alt="Wooden Villa Bathroom" loading="lazy">
-                        <div class="image-overlay"><span>Wooden Villa Bathroom</span></div>
-                    </div>
-                    <div class="gallery-item" onclick="openLightbox(0)">
-                        <img src="assets/images/farm-aerial.jpg" alt="Aerial View of Kanchi Farm Stay" loading="lazy">
-                        <div class="image-overlay"><span>Aerial View of Kanchi Farm Stay</span></div>
-                    </div>
-                    <div class="gallery-item" onclick="openLightbox(1)">
-                        <img src="assets/images/villa-exterior.jpg" alt="Villa Exterior" loading="lazy">
-                        <div class="image-overlay"><span>Villa Exterior</span></div>
-                    </div>
-                    <div class="gallery-item" onclick="openLightbox(2)">
-                        <img src="assets/images/farm-pathway.jpg" alt="Farm Pathway with Palm Trees" loading="lazy">
-                        <div class="image-overlay"><span>Farm Pathway with Palm Trees</span></div>
-                    </div>
-                    <div class="gallery-item" onclick="openLightbox(3)">
-                        <img src="assets/images/farm-swing.jpg" alt="Swing and Play Area" loading="lazy">
-                        <div class="image-overlay"><span>Swing and Play Area</span></div>
-                    </div>
-                    <div class="gallery-item" onclick="openLightbox(4)">
-                        <img src="assets/images/outdoor-seating.jpg" alt="Outdoor Meditation Seating" loading="lazy">
-                        <div class="image-overlay"><span>Outdoor Meditation Seating</span></div>
-                    </div>
-                    <div class="gallery-item" onclick="openLightbox(5)">
-                        <img src="assets/images/farm-rabbit-sunset.jpg" alt="Farm Rabbit at Sunset" loading="lazy">
-                        <div class="image-overlay"><span>Farm Rabbit at Sunset</span></div>
-                    </div>
-                    <div class="gallery-item" onclick="openLightbox(6)">
-                        <img src="assets/images/farm-rabbit-closeup.jpg" alt="Rabbit Close-up" loading="lazy">
-                        <div class="image-overlay"><span>Rabbit Close-up</span></div>
-                    </div>
-                    <div class="gallery-item" onclick="openLightbox(7)">
-                        <img src="assets/images/natures-nest-gate.jpg" alt="Nature's Nest Gate" loading="lazy">
-                        <div class="image-overlay"><span>Nature's Nest Gate</span></div>
-                    </div>
-                    <div class="gallery-item" onclick="openLightbox(8)">
-                        <img src="assets/images/tranquil-retreat-gate.jpg" alt="Tranquil Retreat Gate" loading="lazy">
-                        <div class="image-overlay"><span>Tranquil Retreat Gate</span></div>
-                    </div>
-                    <div class="gallery-item" onclick="openLightbox(9)">
-                        <img src="assets/images/farm-turkeys.jpg" alt="Farm Turkeys" loading="lazy">
-                        <div class="image-overlay"><span>Farm Turkeys</span></div>
-                    </div>
-                    <div class="gallery-item" onclick="openLightbox(10)">
-                        <img src="assets/images/farm-rabbits-pair.jpg" alt="Pair of Rabbits" loading="lazy">
-                        <div class="image-overlay"><span>Pair of Rabbits</span></div>
-                    </div>
-                    <div class="gallery-item" onclick="openLightbox(11)">
-                        <img src="assets/images/farm-chicks-group.jpg" alt="Baby Chicks" loading="lazy">
-                        <div class="image-overlay"><span>Baby Chicks</span></div>
-                    </div>
-                    <div class="gallery-item" onclick="openLightbox(12)">
-                        <img src="assets/images/farm-rabbit-white.jpg" alt="White Rabbit" loading="lazy">
-                        <div class="image-overlay"><span>White Rabbit</span></div>
-                    </div>
-                    <div class="gallery-item" onclick="openLightbox(13)">
-                        <img src="assets/images/farm-rabbits-feeding.jpg" alt="Rabbits Feeding" loading="lazy">
-                        <div class="image-overlay"><span>Rabbits Feeding</span></div>
-                    </div>
-                    <div class="gallery-item" onclick="openLightbox(14)">
-                        <img src="assets/images/farm-rice-paddy.jpg" alt="Rice Paddy Fields" loading="lazy">
-                        <div class="image-overlay"><span>Rice Paddy Fields</span></div>
-                    </div>
-                    <div class="gallery-item" onclick="openLightbox(15)">
-                        <img src="assets/images/farm-dog.jpg" alt="Farm Dog" loading="lazy">
-                        <div class="image-overlay"><span>Farm Dog</span></div>
-                    </div>
-                    <div class="gallery-item" onclick="openLightbox(16)">
-                        <img src="assets/images/farm-chicks-enclosure.jpg" alt="Chicks in Enclosure" loading="lazy">
-                        <div class="image-overlay"><span>Chicks in Enclosure</span></div>
-                    </div>
-                    <div class="gallery-item" onclick="openLightbox(17)">
-                        <img src="assets/images/farm-chick-closeup.jpg" alt="Baby Chick Close-up" loading="lazy">
-                        <div class="image-overlay"><span>Baby Chick Close-up</span></div>
-                    </div>
-                    <div class="gallery-item" onclick="openLightbox(18)">
-                        <img src="assets/images/farm-gate.jpg" alt="Welcome to Kanchi Farm Stay" loading="lazy">
-                        <div class="image-overlay"><span>Welcome to Kanchi Farm Stay</span></div>
-                    </div>
-                    <div class="gallery-item" onclick="openLightbox(19)">
-                        <img src="assets/images/farm-exterior.jpg" alt="Lush Green Surroundings" loading="lazy">
-                        <div class="image-overlay"><span>Lush Green Surroundings</span></div>
-                    </div>
-                    <div class="gallery-item" onclick="openLightbox(20)">
-                        <img src="assets/images/natures-nest-1.jpg" alt="Spacious Wooden Interiors" loading="lazy">
-                        <div class="image-overlay"><span>Spacious Wooden Interiors</span></div>
-                    </div>
-                    <div class="gallery-item" onclick="openLightbox(21)">
-                        <img src="assets/images/natures-nest-2.jpg" alt="Cozy Living Spaces" loading="lazy">
-                        <div class="image-overlay"><span>Cozy Living Spaces</span></div>
-                    </div>
-                    <div class="gallery-item" onclick="openLightbox(22)">
-                        <img src="assets/images/about-farm.jpg" alt="Rustic Cottage Charm" loading="lazy">
-                        <div class="image-overlay"><span>Rustic Cottage Charm</span></div>
-                    </div>
-                    <div class="gallery-item" onclick="openLightbox(23)">
-                        <img src="assets/images/farm-dog-portrait.jpg" alt="German Shepherd Portrait" loading="lazy">
-                        <div class="image-overlay"><span>German Shepherd Portrait</span></div>
-                    </div>
-                    <div class="gallery-item" onclick="openLightbox(24)">
-                        <img src="assets/images/farm-dogs-relaxing.jpg" alt="Farm Dogs Relaxing" loading="lazy">
-                        <div class="image-overlay"><span>Farm Dogs Relaxing</span></div>
-                    </div>
-                    <div class="gallery-item" onclick="openLightbox(25)">
-                        <img src="assets/images/gallery-room-swing.jpg" alt="Living Room with Swing" loading="lazy">
-                        <div class="image-overlay"><span>Living Room with Swing</span></div>
-                    </div>
-                    <div class="gallery-item" onclick="openLightbox(26)">
-                        <img src="assets/images/gallery-white-building-front.jpg" alt="Farm House Front View"
-                            loading="lazy">
-                        <div class="image-overlay"><span>Farm House Front View</span></div>
-                    </div>
-                    <div class="gallery-item" onclick="openLightbox(27)">
-                        <img src="assets/images/gallery-small-cottage.jpg" alt="Small Cottage" loading="lazy">
-                        <div class="image-overlay"><span>Small Cottage</span></div>
-                    </div>
-                    <div class="gallery-item" onclick="openLightbox(28)">
-                        <img src="assets/images/gallery-white-building-side.jpg" alt="Farm House Side View"
-                            loading="lazy">
-                        <div class="image-overlay"><span>Farm House Side View</span></div>
-                    </div>
-                    <div class="gallery-item" onclick="openLightbox(29)">
-                        <img src="assets/images/gallery-pink-building.jpg" alt="Pink Farm Building" loading="lazy">
-                        <div class="image-overlay"><span>Pink Farm Building</span></div>
-                    </div>
-                    <div class="gallery-item" onclick="openLightbox(30)">
-                        <img src="assets/images/gallery-dining-hall-1.jpg" alt="Spacious Dining Hall" loading="lazy">
-                        <div class="image-overlay"><span>Spacious Dining Hall</span></div>
-                    </div>
-                    <div class="gallery-item" onclick="openLightbox(31)">
-                        <img src="assets/images/gallery-dining-hall-2.jpg" alt="Dining Area" loading="lazy">
-                        <div class="image-overlay"><span>Dining Area</span></div>
-                    </div>
-                    <div class="gallery-item" onclick="openLightbox(32)">
-                        <img src="assets/images/gallery-entrance-car.jpg" alt="Farm Entrance" loading="lazy">
-                        <div class="image-overlay"><span>Farm Entrance</span></div>
-                    </div>
-                    <div class="gallery-item" onclick="openLightbox(33)">
-                        <img src="assets/images/gallery-entrance-path.jpg" alt="Entrance Pathway" loading="lazy">
-                        <div class="image-overlay"><span>Entrance Pathway</span></div>
-                    </div>
-                    <div class="gallery-item" onclick="openLightbox(34)">
-                        <img src="assets/images/gallery-tent-camping.jpg" alt="Camping Tent" loading="lazy">
-                        <div class="image-overlay"><span>Camping Tent</span></div>
-                    </div>
+                <!-- Filter Buttons -->
+                <div class="gallery-filters">
+                    <button class="gallery-filter-btn active" data-filter="all" onclick="renderGalleryGrid('all')">All</button>
+                    <button class="gallery-filter-btn" data-filter="accommodations" onclick="renderGalleryGrid('accommodations')">Accommodations</button>
+                    <button class="gallery-filter-btn" data-filter="animals" onclick="renderGalleryGrid('animals')">Farm Animals</button>
+                    <button class="gallery-filter-btn" data-filter="farm-life" onclick="renderGalleryGrid('farm-life')">Farm Life</button>
+                    <button class="gallery-filter-btn" data-filter="facilities" onclick="renderGalleryGrid('facilities')">Facilities</button>
                 </div>
+
+                <!-- Gallery Grid (populated by JS) -->
+                <div class="gallery-grid-page" id="gallery-grid"></div>
             </div>
         </section>
     </div>
@@ -199,7 +43,7 @@
     <div id="footer-placeholder"></div>
 
     <!-- Scripts -->
-    <script src="script.js?v=1"></script>
+    <script src="script.js?v=2"></script>
 </body>
 
 </html>

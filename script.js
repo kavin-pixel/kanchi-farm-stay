@@ -19,8 +19,8 @@ const rooms = [
             "assets/images/gallery-room-swing.jpg",
             "assets/images/wooden-villa-bathroom.png"
         ],
-        price: "₹3,000 / night",
-        numericPrice: 3000,
+        price: "₹3,500 / night",
+        numericPrice: 3500,
         capacity: "3 Adults, 1 Child",
         size: "512 sqft",
         airbnbUrl: "https://airbnb.co.in/h/kanchifarmstay-woodenvilla",
@@ -42,7 +42,7 @@ const rooms = [
         ],
         price: "₹2,500 / night",
         numericPrice: 2500,
-        capacity: "4 Adults, 1 Children",
+        capacity: "4 Adults, 2 Children",
         size: "600 sqft",
         airbnbUrl: "https://airbnb.co.in/h/kanchifarmstay-whitevilla",
         bookingUrl: "https://www.booking.com/Share-HedGP2U"
@@ -60,8 +60,8 @@ const rooms = [
             "assets/images/natures-nest-2.jpg",
             "assets/images/natures-nest-3.jpg"
         ],
-        price: "₹2,000 / night",
-        numericPrice: 2000,
+        price: "₹2,500 / night",
+        numericPrice: 2500,
         capacity: "4 Adults, 2 Children",
         size: "300 sqft",
         airbnbUrl: "https://airbnb.co.in/h/kanchifarmstay-naturesnest",
@@ -81,8 +81,8 @@ const rooms = [
             "assets/images/tranquil-retreat-3.jpg",
             "assets/images/tranquil-retreat-4.jpg"
         ],
-        price: "₹2,000 / night",
-        numericPrice: 2000,
+        price: "₹2,500 / night",
+        numericPrice: 2500,
         capacity: "4 Adults, 2 Children",
         size: "450 sqft",
         airbnbUrl: "https://airbnb.co.in/h/kanchifarmstay-tranquilretreat",
@@ -96,64 +96,16 @@ const rooms = [
         amenities: ["Kitchen", "Wifi", "Private Pool", "Air Conditioning", "Pet Friendly", "BBQ Grill"],
         image: "assets/images/wooden-cottage-hero.jpg",
         images: [
-            "assets/images/wooden-cottage-new-1.jpg",
-            "assets/images/wooden-cottage-new-2.jpg",
-            "assets/images/wooden-cottage-new-3.jpg",
-            "assets/images/wooden-cottage-new-4.jpg",
-            "assets/images/wooden-cottage-new-5.jpg",
-            "assets/images/wooden-cottage-new-6.jpg",
-            "assets/images/wooden-cottage-new-7.jpg"
+            "assets/images/wooden-cottage-hero.jpg",
+            "assets/images/wooden-cottage-1.jpg",
+            "assets/images/wooden-cottage-2.jpg",
+            "assets/images/wooden-cottage-3.jpg"
         ],
-        price: "₹2,500 / night",
-        numericPrice: 2500,
-        capacity: "3 Guests, 1 Bedroom, 2 Beds",
+        price: "₹2,000 / night",
+        numericPrice: 2000,
+        capacity: "4 Guests, 1 Bedroom, 2 Beds",
         size: "Contact for details",
         airbnbUrl: "https://airbnb.co.in/h/kanchifarmstay-woodencottage",
-        bookingUrl: "index.html#contact"
-    },
-    {
-        id: 'kanchi-farm-stay',
-        name: "KanchiFarmStay (Group Booking)",
-        shortDescription: "Exclusive booking of the entire farm stay for large groups and private events.",
-        fullDescription: "Experience the ultimate private getaway by booking the entire Kanchi Farm Stay. Perfect for large family gatherings, corporate retreats, or special events. Enjoy exclusive access to all our villas, cottages, common areas, dining hall, and sprawling gardens without any other guests.",
-        amenities: ["Exclusive Access", "All Bedrooms", "Dining Hall", "Full Kitchen", "Private Grounds", "Event Space", "Campfire", "Pet Friendly"],
-        image: "assets/images/farm-hero.jpg",
-        images: [
-            "assets/images/farm-hero.jpg",
-            "assets/images/farm-aerial.jpg",
-            "assets/images/gallery-dining-hall-1.jpg",
-            "assets/images/gallery-tent-camping.jpg",
-            "assets/images/farm-exterior.jpg"
-        ],
-        price: "₹8,000 / night (up to 10 guests)",
-        numericPrice: 8000,
-        extraPersonPrice: 1000,
-        baseGuests: 10,
-        capacity: "Large Groups (10+ Guests)",
-        size: "Entire 5-Acre Property",
-        airbnbUrl: "#contact",
-        bookingUrl: "index.html#contact"
-    },
-    {
-        id: 'tent',
-        name: "Tent",
-        shortDescription: "Experience the outdoors in our comfortable tent.",
-        fullDescription: "Sleep under the stars and wake up to the sound of nature in our spacious tent. It provides all the rustic charm of camping without sacrificing comfort. Perfect for adventurous couples or friends looking for a unique farm stay experience close to nature.",
-        amenities: ["Comfortable Beds", "Shared Bathroom Access", "Campfire Access", "Star Gazing", "Pet Friendly", "Fan"],
-        image: "assets/images/tent-accommodation-3.jpg",
-        images: [
-            "assets/images/tent-new-1.jpg",
-            "assets/images/tent-new-2.jpg",
-            "assets/images/tent-new-3.jpg",
-            "assets/images/tent-new-4.jpg",
-            "assets/images/tent-new-5.jpg",
-            "assets/images/tent-new-6.jpg"
-        ],
-        price: "₹500 / night",
-        numericPrice: 500,
-        capacity: "2 Guests",
-        size: "Cozy Tent Setup",
-        airbnbUrl: "#contact",
         bookingUrl: "index.html#contact"
     }
 ];
@@ -345,8 +297,6 @@ function loadRoomDetails() {
         const checkoutInput = document.getElementById('room-checkout');
         const totalPriceEl = document.getElementById('room-total-price');
         const razorpayBtn = document.getElementById('razorpay-btn');
-        const guestCountContainer = document.getElementById('guest-count-container');
-        const guestInput = document.getElementById('room-guests');
 
         if (checkinInput && checkoutInput && totalPriceEl && razorpayBtn) {
             const today = new Date();
@@ -358,13 +308,6 @@ function loadRoomDetails() {
 
             let days = 1;
             let currentTotal = room.numericPrice;
-            let numGuests = 2; // Default
-            
-            // Show guest input only for the group booking
-            if (room.id === 'kanchi-farm-stay' && guestCountContainer && guestInput) {
-                guestCountContainer.style.display = 'block';
-                numGuests = parseInt(guestInput.value) || 10;
-            }
 
             const updateTotalPrice = () => {
                 const checkinDate = new Date(checkinInput.value);
@@ -373,20 +316,7 @@ function loadRoomDetails() {
                 if (checkinDate && checkoutDate && checkoutDate > checkinDate) {
                     const diffTime = Math.abs(checkoutDate - checkinDate);
                     days = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                    
-                    let nightlyRate = room.numericPrice;
-                    
-                    // Add extra guests logic
-                    if (room.id === 'kanchi-farm-stay' && guestInput) {
-                        numGuests = Math.min(parseInt(guestInput.value) || 10, 25);
-                        guestInput.value = numGuests;
-                        if (numGuests > room.baseGuests) {
-                            const extraGuests = numGuests - room.baseGuests;
-                            nightlyRate += (extraGuests * room.extraPersonPrice);
-                        }
-                    }
-                    
-                    currentTotal = nightlyRate * days;
+                    currentTotal = room.numericPrice * days;
                     totalPriceEl.innerText = `₹${currentTotal.toLocaleString()}`;
                     razorpayBtn.disabled = false;
                     razorpayBtn.style.opacity = "1";
@@ -412,9 +342,6 @@ function loadRoomDetails() {
             });
 
             checkoutInput.addEventListener('change', updateTotalPrice);
-            if (guestInput) {
-                guestInput.addEventListener('input', updateTotalPrice);
-            }
 
             // Set Initial Values
             checkinInput.value = today.toISOString().split('T')[0];
@@ -462,8 +389,7 @@ function loadRoomDetails() {
                             checkin: checkinInput.value,
                             checkout: checkoutInput.value,
                             roomName: room.name,
-                            days: days,
-                            numGuests: numGuests
+                            days: days
                         })
                     });
 
@@ -594,10 +520,77 @@ function getPlatformColor(platform) {
 // LOGIC: Home Page Reviews
 // Reverting to static HTML in index.html for home page reviews as per user request
 
+// DATA: Gallery Images
+const galleryImages = [
+    { src: 'assets/images/wooden-villa-swing-3.jpg', caption: 'Wooden Villa Beds', category: 'accommodations' },
+    { src: 'assets/images/wooden-villa-swing-4.jpg', caption: 'Wooden Villa Living Area', category: 'accommodations' },
+    { src: 'assets/images/wooden-villa-swing-5.jpg', caption: 'Wooden Villa Room Frame', category: 'accommodations' },
+    { src: 'assets/images/wooden-villa-bathroom.png', caption: 'Wooden Villa Bathroom', category: 'accommodations' },
+    { src: 'assets/images/farm-aerial.jpg', caption: 'Aerial View of Kanchi Farm Stay', category: 'farm-life' },
+    { src: 'assets/images/villa-exterior.jpg', caption: 'Villa Exterior', category: 'accommodations' },
+    { src: 'assets/images/farm-pathway.jpg', caption: 'Farm Pathway with Palm Trees', category: 'farm-life' },
+    { src: 'assets/images/farm-swing.jpg', caption: 'Swing and Play Area', category: 'facilities' },
+    { src: 'assets/images/outdoor-seating.jpg', caption: 'Outdoor Meditation Seating', category: 'facilities' },
+    { src: 'assets/images/farm-rabbit-sunset.jpg', caption: 'Farm Rabbit at Sunset', category: 'animals' },
+    { src: 'assets/images/farm-rabbit-closeup.jpg', caption: 'Rabbit Close-up', category: 'animals' },
+    { src: 'assets/images/natures-nest-gate.jpg', caption: "Nature's Nest Gate", category: 'farm-life' },
+    { src: 'assets/images/tranquil-retreat-gate.jpg', caption: 'Tranquil Retreat Gate', category: 'farm-life' },
+    { src: 'assets/images/farm-turkeys.jpg', caption: 'Farm Turkeys', category: 'animals' },
+    { src: 'assets/images/farm-rabbits-pair.jpg', caption: 'Pair of Rabbits', category: 'animals' },
+    { src: 'assets/images/farm-chicks-group.jpg', caption: 'Baby Chicks', category: 'animals' },
+    { src: 'assets/images/farm-rabbit-white.jpg', caption: 'White Rabbit', category: 'animals' },
+    { src: 'assets/images/farm-rabbits-feeding.jpg', caption: 'Rabbits Feeding', category: 'animals' },
+    { src: 'assets/images/farm-rice-paddy.jpg', caption: 'Rice Paddy Fields', category: 'farm-life' },
+    { src: 'assets/images/farm-dog.jpg', caption: 'Farm Dog', category: 'animals' },
+    { src: 'assets/images/farm-chicks-enclosure.jpg', caption: 'Chicks in Enclosure', category: 'animals' },
+    { src: 'assets/images/farm-chick-closeup.jpg', caption: 'Baby Chick Close-up', category: 'animals' },
+    { src: 'assets/images/farm-gate.jpg', caption: 'Welcome to Kanchi Farm Stay', category: 'farm-life' },
+    { src: 'assets/images/farm-exterior.jpg', caption: 'Lush Green Surroundings', category: 'farm-life' },
+    { src: 'assets/images/natures-nest-1.jpg', caption: 'Spacious Wooden Interiors', category: 'accommodations' },
+    { src: 'assets/images/natures-nest-2.jpg', caption: 'Cozy Living Spaces', category: 'accommodations' },
+    { src: 'assets/images/about-farm.jpg', caption: 'Rustic Cottage Charm', category: 'farm-life' },
+    { src: 'assets/images/farm-dog-portrait.jpg', caption: 'German Shepherd Portrait', category: 'animals' },
+    { src: 'assets/images/farm-dogs-relaxing.jpg', caption: 'Farm Dogs Relaxing', category: 'animals' },
+    { src: 'assets/images/gallery-room-swing.jpg', caption: 'Living Room with Swing', category: 'accommodations' },
+    { src: 'assets/images/gallery-white-building-front.jpg', caption: 'Farm House Front View', category: 'farm-life' },
+    { src: 'assets/images/gallery-small-cottage.jpg', caption: 'Small Cottage', category: 'accommodations' },
+    { src: 'assets/images/gallery-white-building-side.jpg', caption: 'Farm House Side View', category: 'farm-life' },
+    { src: 'assets/images/gallery-pink-building.jpg', caption: 'Pink Farm Building', category: 'farm-life' },
+    { src: 'assets/images/gallery-dining-hall-1.jpg', caption: 'Spacious Dining Hall', category: 'facilities' },
+    { src: 'assets/images/gallery-dining-hall-2.jpg', caption: 'Dining Area', category: 'facilities' },
+    { src: 'assets/images/gallery-entrance-car.jpg', caption: 'Farm Entrance', category: 'farm-life' },
+    { src: 'assets/images/gallery-entrance-path.jpg', caption: 'Entrance Pathway', category: 'farm-life' },
+    { src: 'assets/images/gallery-tent-camping.jpg', caption: 'Camping Tent', category: 'facilities' },
+];
+
+// LOGIC: Gallery Page
+let currentGalleryFilter = 'all';
+let currentLightboxImages = [];
+let currentLightboxIndex = 0;
+
+function renderGalleryGrid(filter) {
+    currentGalleryFilter = filter;
+    const grid = document.getElementById('gallery-grid');
+    if (!grid) return;
+
+    const filtered = filter === 'all' ? galleryImages : galleryImages.filter(img => img.category === filter);
+    currentLightboxImages = filtered;
+
+    grid.innerHTML = filtered.map((img, index) => `
+        <div class="gallery-item" onclick="openLightbox(${index})">
+            <img src="${img.src}" alt="${img.caption}" loading="lazy">
+            <div class="image-overlay"><span>${img.caption}</span></div>
+        </div>
+    `).join('');
+
+    // Update active filter button
+    document.querySelectorAll('.gallery-filter-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.filter === filter);
+    });
+}
 
 // LOGIC: Lightbox
 function initLightbox() {
-    // Create Lightbox Elements
     const lightbox = document.createElement('div');
     lightbox.id = 'lightbox';
     lightbox.className = 'lightbox';
@@ -609,49 +602,83 @@ function initLightbox() {
     closeBtn.className = 'lightbox-close';
     closeBtn.innerHTML = '&times;';
 
+    const prevBtn = document.createElement('div');
+    prevBtn.className = 'lightbox-prev';
+    prevBtn.innerHTML = '&#8249;';
+    prevBtn.addEventListener('click', (e) => { e.stopPropagation(); navigateLightbox(-1); });
+
+    const nextBtn = document.createElement('div');
+    nextBtn.className = 'lightbox-next';
+    nextBtn.innerHTML = '&#8250;';
+    nextBtn.addEventListener('click', (e) => { e.stopPropagation(); navigateLightbox(1); });
+
+    const caption = document.createElement('div');
+    caption.className = 'lightbox-caption';
+    caption.id = 'lightbox-caption';
+
+    const counter = document.createElement('div');
+    counter.className = 'lightbox-counter';
+    counter.id = 'lightbox-counter';
+
+    lightbox.appendChild(prevBtn);
     lightbox.appendChild(img);
+    lightbox.appendChild(nextBtn);
     lightbox.appendChild(closeBtn);
+    lightbox.appendChild(caption);
+    lightbox.appendChild(counter);
     document.body.appendChild(lightbox);
 
-    // Event Listeners
     lightbox.addEventListener('click', (e) => {
-        if (e.target !== img) {
-            closeLightbox();
-        }
+        if (e.target === lightbox) closeLightbox();
     });
 
     closeBtn.addEventListener('click', closeLightbox);
 
-    // Global Event Delegation for images
-    document.addEventListener('click', (e) => {
-        // Gallery Page Images or Room Details Images
-        if (e.target.tagName === 'IMG' &&
-            (e.target.closest('.gallery-grid') || e.target.closest('.room-gallery-grid') || e.target.closest('.gallery-item'))) {
-            openLightbox(e.target.src);
-        }
-    });
-
-    // Close on Escape key
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') closeLightbox();
+        if (e.key === 'ArrowLeft') navigateLightbox(-1);
+        if (e.key === 'ArrowRight') navigateLightbox(1);
     });
 }
 
-function openLightbox(src) {
+function openLightbox(indexOrSrc) {
     const lightbox = document.getElementById('lightbox');
     const img = document.getElementById('lightbox-img');
-    if (lightbox && img) {
-        img.src = src;
-        lightbox.classList.add('active');
-        document.body.style.overflow = 'hidden'; // Prevent scrolling
+    const captionEl = document.getElementById('lightbox-caption');
+    const counterEl = document.getElementById('lightbox-counter');
+    if (!lightbox || !img) return;
+
+    if (typeof indexOrSrc === 'number') {
+        currentLightboxIndex = indexOrSrc;
+        // If no filtered set (e.g. called from room details), fall back to full list
+        if (!currentLightboxImages.length) currentLightboxImages = galleryImages;
+        const item = currentLightboxImages[currentLightboxIndex];
+        img.src = item.src;
+        if (captionEl) captionEl.textContent = item.caption;
+        if (counterEl) counterEl.textContent = `${currentLightboxIndex + 1} / ${currentLightboxImages.length}`;
+    } else {
+        // Direct src string (e.g. from room details page)
+        img.src = indexOrSrc;
+        if (captionEl) captionEl.textContent = '';
+        if (counterEl) counterEl.textContent = '';
+        currentLightboxImages = [];
     }
+
+    lightbox.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function navigateLightbox(direction) {
+    if (!currentLightboxImages.length) return;
+    currentLightboxIndex = (currentLightboxIndex + direction + currentLightboxImages.length) % currentLightboxImages.length;
+    openLightbox(currentLightboxIndex);
 }
 
 function closeLightbox() {
     const lightbox = document.getElementById('lightbox');
     if (lightbox) {
         lightbox.classList.remove('active');
-        document.body.style.overflow = ''; // Restore scrolling
+        document.body.style.overflow = '';
     }
 }
 
@@ -674,6 +701,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (path.includes('accommodations.html')) {
         renderAccommodations();
+    }
+
+    if (path.includes('gallery.html')) {
+        renderGalleryGrid('all');
     }
 });
 

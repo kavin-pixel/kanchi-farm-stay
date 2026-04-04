@@ -36,5 +36,9 @@ test_images.html
 
 # Claude Code project config
 .claude/
+
+# Channel manager runtime files
+channel-manager/calendar.db
+channel-manager/sync.log
 *.MP4
 *.mp4

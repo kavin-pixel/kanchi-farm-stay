@@ -33,7 +33,6 @@ $checkin = $input['checkin'] ?? 'Not provided';
 $checkout = $input['checkout'] ?? 'Not provided';
 $roomName = $input['roomName'] ?? 'Not provided';
 $days = $input['days'] ?? 'Not provided';
-$numGuests = $input['numGuests'] ?? 'Not provided';
 
 // Send Email Notification
 $to = "ops@kanchifarmstay.com";
@@ -46,7 +45,6 @@ $emailMessage .= "Room: " . $roomName . "\n";
 $emailMessage .= "Check-in: " . $checkin . "\n";
 $emailMessage .= "Check-out: " . $checkout . "\n";
 $emailMessage .= "Duration: " . $days . " night(s)\n";
-$emailMessage .= "Guests: " . $numGuests . "\n";
 $emailMessage .= "Amount: ₹" . ($amount / 100) . "\n\n";
 $emailMessage .= "Note: This email means the user clicked 'Pay with Razorpay' and an order was generated. Check your Razorpay dashboard for the final successful payment status.";
 

@@ -236,7 +236,10 @@ function toggleMenu() {
 function isActive(page) {
     const path = window.location.pathname;
     const pageName = path.split('/').pop() || 'index.html';
-    return pageName === page ? 'active' : '';
+    // Match with or without .html extension
+    const pageBase = page.replace(/\.html$/, '');
+    const nameBase = pageName.replace(/\.html$/, '') || 'index';
+    return (nameBase === pageBase || pageName === page) ? 'active' : '';
 }
 
 // LOGIC: Room Details Page
@@ -712,22 +715,22 @@ document.addEventListener('DOMContentLoaded', () => {
     renderFooter();
     initLightbox();
 
-    // Page specific logic
-    const path = window.location.pathname;
+    // Page specific logic — match with or without .html extension (clean URLs)
+    const path = window.location.pathname.replace(/\.html$/, '');
 
-    if (path.includes('room-details.html')) {
+    if (path.includes('room-details')) {
         loadRoomDetails();
     }
 
-    if (path.includes('reviews.html')) {
+    if (path.includes('reviews')) {
         loadReviews();
     }
 
-    if (path.includes('accommodations.html')) {
+    if (path.includes('accommodations')) {
         renderAccommodations();
     }
 
-    if (path.includes('gallery.html')) {
+    if (path.includes('gallery')) {
         renderGalleryGrid('all');
     }
 

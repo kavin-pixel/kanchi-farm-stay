@@ -107,6 +107,49 @@ const rooms = [
         size: "Contact for details",
         airbnbUrl: "https://airbnb.co.in/h/kanchifarmstay-woodencottage",
         bookingUrl: "index.html#contact"
+    },
+    {
+        id: 'kanchi-farm-stay',
+        name: "KanchiFarmStay (Group Booking)",
+        shortDescription: "Exclusive booking of the entire farm stay for large groups and private events.",
+        fullDescription: "Experience the ultimate private getaway by booking the entire Kanchi Farm Stay. Perfect for large family gatherings, corporate retreats, or special events. Enjoy exclusive access to all our villas, cottages, common areas, dining hall, and sprawling gardens without any other guests.",
+        amenities: ["Exclusive Access", "All Bedrooms", "Dining Hall", "Full Kitchen", "Private Grounds", "Event Space", "Campfire", "Pet Friendly"],
+        image: "assets/images/farm-hero.jpg",
+        images: [
+            "assets/images/farm-hero.jpg",
+            "assets/images/farm-aerial.jpg",
+            "assets/images/gallery-dining-hall-1.jpg",
+            "assets/images/gallery-tent-camping.jpg",
+            "assets/images/farm-exterior.jpg"
+        ],
+        price: "₹8,000 / night (up to 10 guests)",
+        numericPrice: 8000,
+        capacity: "Large Groups (10+ Guests)",
+        size: "Entire 5-Acre Property",
+        airbnbUrl: "contact.html",
+        bookingUrl: "contact.html"
+    },
+    {
+        id: 'tent',
+        name: "Tent",
+        shortDescription: "Sleep under the stars in our comfortable farm stay tent.",
+        fullDescription: "Sleep under the stars and wake up to the sound of nature in our spacious tent. It provides all the rustic charm of camping without sacrificing comfort. Perfect for adventurous couples or friends looking for a unique farm stay experience close to nature.",
+        amenities: ["Comfortable Beds", "Shared Bathroom Access", "Campfire Access", "Star Gazing", "Pet Friendly", "Fan"],
+        image: "assets/images/tent-accommodation-3.jpg",
+        images: [
+            "assets/images/tent-new-1.jpg",
+            "assets/images/tent-new-2.jpg",
+            "assets/images/tent-new-3.jpg",
+            "assets/images/tent-new-4.jpg",
+            "assets/images/tent-new-5.jpg",
+            "assets/images/tent-new-6.jpg"
+        ],
+        price: "₹500 / night",
+        numericPrice: 500,
+        capacity: "2 Guests",
+        size: "Cozy Tent Setup",
+        airbnbUrl: "contact.html",
+        bookingUrl: "contact.html"
     }
 ];
 

@@ -41,4 +41,6 @@ define('ROOM_IDS', [
     'natures-nest'     => "Nature's Nest",
     'tranquil-retreat' => 'Tranquil Retreat',
     'wooden-cottage'   => 'Wooden Cottage',
+    'kanchi-farm-stay' => 'KanchiFarmStay (Group Booking)',
+    'tent'             => 'Tent',
 ]);

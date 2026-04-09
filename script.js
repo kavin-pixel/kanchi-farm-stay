@@ -491,6 +491,21 @@ function loadRoomDetails() {
                     alert('Please fill in your Full Name, Email Address, and Phone Number before proceeding to payment.');
                     return;
                 }
+
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(guestEmail)) {
+                    alert('Please enter a valid email address (e.g. you@example.com).');
+                    document.getElementById('guest-email')?.focus();
+                    return;
+                }
+
+                // Accept Indian (+91) and international formats, 7–15 digits
+                const phoneDigits = guestPhone.replace(/[\s\-().+]/g, '');
+                if (!/^\d{7,15}$/.test(phoneDigits)) {
+                    alert('Please enter a valid phone number (7–15 digits, e.g. +91 98765 43210).');
+                    document.getElementById('guest-phone')?.focus();
+                    return;
+                }
                 if (days <= 0) {
                     alert('Please select valid Check-in and Check-out dates.');
                     return;

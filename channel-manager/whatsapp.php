@@ -1,16 +1,40 @@
 <?php
 require_once __DIR__ . '/config.php';
 
+// ── Admin notification (goes to ops phone) ───────────────────
 function sendWhatsAppNotification(string $message): void {
     if (WHATSAPP_PROVIDER === 'none') return;
     if (WHATSAPP_PROVIDER === 'callmebot') {
-        _sendViaCallMeBot($message);
+        _sendViaCallMeBot(WHATSAPP_PHONE, $message);
+    } elseif (WHATSAPP_PROVIDER === 'meta' && META_WA_TOKEN && META_WA_PHONE_ID) {
+        _sendViaMeta(WHATSAPP_PHONE, $message);
     }
 }
 
-function _sendViaCallMeBot(string $message): void {
+// ── Guest-facing messages (goes to any phone number) ─────────
+function sendWhatsAppToGuest(string $phone, string $message): bool {
+    if (WHATSAPP_PROVIDER === 'none') return false;
+    // Normalise phone: strip spaces, dashes, +
+    $phone = preg_replace('/[^0-9]/', '', $phone);
+    if (strlen($phone) < 7) return false;
+
+    if (WHATSAPP_PROVIDER === 'meta' && META_WA_TOKEN && META_WA_PHONE_ID) {
+        return _sendViaMeta($phone, $message);
+    }
+    // CallMeBot can only send to the pre-registered admin phone by default.
+    // For guest messages we use a workaround: send if phone matches admin, else log.
+    if ($phone === preg_replace('/[^0-9]/', '', WHATSAPP_PHONE)) {
+        return _sendViaCallMeBot($phone, $message);
+    }
+    // If Meta API is not configured, send to admin phone with guest context prefix
+    $prefixed = "[To guest {$phone}]\n" . $message;
+    _sendViaCallMeBot(WHATSAPP_PHONE, $prefixed);
+    return true;
+}
+
+function _sendViaCallMeBot(string $phone, string $message): bool {
     $url = 'https://api.callmebot.com/whatsapp.php?' . http_build_query([
-        'phone'  => WHATSAPP_PHONE,
+        'phone'  => $phone,
         'text'   => $message,
         'apikey' => CALLMEBOT_API_KEY,
     ]);
@@ -20,8 +44,35 @@ function _sendViaCallMeBot(string $message): void {
         CURLOPT_TIMEOUT        => 10,
         CURLOPT_USERAGENT      => 'KanchiFarmStay-ChannelManager/1.0',
     ]);
-    curl_exec($ch);
+    $resp = curl_exec($ch);
+    $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
+    return $code >= 200 && $code < 300;
+}
+
+function _sendViaMeta(string $phone, string $message): bool {
+    if (!META_WA_TOKEN || !META_WA_PHONE_ID) return false;
+    $payload = json_encode([
+        'messaging_product' => 'whatsapp',
+        'to'                => $phone,
+        'type'              => 'text',
+        'text'              => ['body' => $message],
+    ]);
+    $ch = curl_init("https://graph.facebook.com/v18.0/" . META_WA_PHONE_ID . "/messages");
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_POST           => true,
+        CURLOPT_POSTFIELDS     => $payload,
+        CURLOPT_TIMEOUT        => 15,
+        CURLOPT_HTTPHEADER     => [
+            'Content-Type: application/json',
+            'Authorization: Bearer ' . META_WA_TOKEN,
+        ],
+    ]);
+    $resp = curl_exec($ch);
+    $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    return $code >= 200 && $code < 300;
 }
 
 function buildBookingMessage(array $b): string {

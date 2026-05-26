@@ -5,7 +5,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Accommodations | Kanchi Farm Stay</title>
-    <meta name="description" content="Browse our accommodations at Kanchi Farm Stay — Wooden Villa, White Villa, Nature's Nest, Tranquil Retreat, and Wooden Cottage. From ₹3,000/night near Kanchipuram.">
+    <meta name="description" content="Browse our accommodations at Kanchi Farm Stay — Wooden Villa, White Villa, Nature's Nest, Tranquil Retreat, and Wooden Cottage. From ₹2,000/night near Kanchipuram.">
+    <link rel="canonical" href="https://kanchifarmstay.com/accommodations.html">
+    <!-- Open Graph -->
+    <meta property="og:type"        content="website">
+    <meta property="og:site_name"   content="Kanchi Farm Stay">
+    <meta property="og:title"       content="Accommodations | Kanchi Farm Stay">
+    <meta property="og:description" content="Browse our accommodations at Kanchi Farm Stay — Wooden Villa, White Villa, Nature's Nest, Tranquil Retreat, and Wooden Cottage. From ₹2,000/night near Kanchipuram.">
+    <meta property="og:url"         content="https://kanchifarmstay.com/accommodations.html">
+    <meta property="og:image"       content="https://kanchifarmstay.com/assets/images/farm-hero.jpg">
+    <!-- Twitter Card -->
+    <meta name="twitter:card"        content="summary_large_image">
+    <meta name="twitter:title"       content="Accommodations | Kanchi Farm Stay">
+    <meta name="twitter:description" content="Browse our accommodations at Kanchi Farm Stay. From ₹2,000/night near Kanchipuram.">
+    <meta name="twitter:image"       content="https://kanchifarmstay.com/assets/images/farm-hero.jpg">
     <link rel="icon" type="image/svg+xml" href="assets/images/favicon.ico">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -37,7 +50,27 @@
     <div id="footer-placeholder"></div>
 
     <!-- Scripts -->
-    <script src="script.js?v=5"></script>
+    <script src="script.js?v=4"></script>
+
+    <!-- Structured Data: ItemList of accommodation offers -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      "name": "Accommodations at Kanchi Farm Stay",
+      "url": "https://kanchifarmstay.com/accommodations.html",
+      "itemListElement": [
+        {"@type":"ListItem","position":1,"name":"Wooden Villa","url":"https://kanchifarmstay.com/room-details.html?id=wooden-villa"},
+        {"@type":"ListItem","position":2,"name":"White Villa","url":"https://kanchifarmstay.com/room-details.html?id=white-villa"},
+        {"@type":"ListItem","position":3,"name":"Nature's Nest","url":"https://kanchifarmstay.com/room-details.html?id=natures-nest"},
+        {"@type":"ListItem","position":4,"name":"Tranquil Retreat","url":"https://kanchifarmstay.com/room-details.html?id=tranquil-retreat"},
+        {"@type":"ListItem","position":5,"name":"Wooden Cottage","url":"https://kanchifarmstay.com/room-details.html?id=wooden-cottage"},
+        {"@type":"ListItem","position":6,"name":"Tree House","url":"https://kanchifarmstay.com/room-details.html?id=tree-house"},
+        {"@type":"ListItem","position":7,"name":"Camping","url":"https://kanchifarmstay.com/room-details.html?id=camping"},
+        {"@type":"ListItem","position":8,"name":"Dormitory","url":"https://kanchifarmstay.com/room-details.html?id=dormitory"}
+      ]
+    }
+    </script>
 </body>
 
 </html>

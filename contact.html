@@ -6,6 +6,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Contact Us | Kanchi Farm Stay</title>
     <meta name="description" content="Contact Kanchi Farm Stay for bookings, availability and inquiries. Reach us by phone, WhatsApp or email. Located near Kanchipuram, Tamil Nadu.">
+    <link rel="canonical" href="https://kanchifarmstay.com/contact.html">
+    <!-- Open Graph -->
+    <meta property="og:type"        content="website">
+    <meta property="og:site_name"   content="Kanchi Farm Stay">
+    <meta property="og:title"       content="Contact Us | Kanchi Farm Stay">
+    <meta property="og:description" content="Contact Kanchi Farm Stay for bookings, availability and inquiries. Reach us by phone, WhatsApp or email.">
+    <meta property="og:url"         content="https://kanchifarmstay.com/contact.html">
+    <meta property="og:image"       content="https://kanchifarmstay.com/assets/images/farm-hero.jpg">
+    <!-- Twitter Card -->
+    <meta name="twitter:card"        content="summary_large_image">
+    <meta name="twitter:title"       content="Contact | Kanchi Farm Stay">
+    <meta name="twitter:description" content="Get in touch with Kanchi Farm Stay for bookings and inquiries. Call, WhatsApp or email us.">
+    <meta name="twitter:image"       content="https://kanchifarmstay.com/assets/images/farm-hero.jpg">
     <link rel="icon" type="image/svg+xml" href="assets/images/favicon.ico">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -151,6 +164,36 @@
     <!-- Scripts -->
     <script src="script.js?v=5"></script>
     <script src="https://web2phone.co.uk/static/formsapp/js/embed.js?v=5" async></script>
+
+    <!-- Structured Data: ContactPage -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "ContactPage",
+      "name": "Contact Kanchi Farm Stay",
+      "url": "https://kanchifarmstay.com/contact.html",
+      "mainEntity": {
+        "@type": "LodgingBusiness",
+        "name": "Kanchi Farm Stay",
+        "telephone": "+916383726094",
+        "email": "ops@kanchifarmstay.com",
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "704, Sastha Nagar, Kovil Street, Chithathur",
+          "addressLocality": "Tiruvannamalai",
+          "addressRegion": "Tamil Nadu",
+          "postalCode": "606601",
+          "addressCountry": "IN"
+        },
+        "openingHoursSpecification": {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],
+          "opens": "08:00",
+          "closes": "21:00"
+        }
+      }
+    }
+    </script>
 </body>
 
 </html>

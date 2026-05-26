@@ -674,6 +674,23 @@ function loadRoomDetails() {
             currentTotal = room.numericPrice * days;
             if (totalPriceEl) totalPriceEl.innerText = `₹${currentTotal.toLocaleString()}`;
             clearBookingError();
+
+            // Fetch dynamic price for selected dates
+            fetch(`channel-manager/availability-api.php?room=${encodeURIComponent(room.id)}&pricing=1&check_in=${ci}&check_out=${co}`)
+                .then(r => r.json())
+                .then(pd => {
+                    if (pd.price && pd.price !== room.numericPrice) {
+                        currentTotal = pd.price * days;
+                        if (totalPriceEl) {
+                            totalPriceEl.innerText = `₹${currentTotal.toLocaleString()}`;
+                            if (pd.adjustment_pct && pd.adjustment_pct !== 0) {
+                                const sign = pd.adjustment_pct > 0 ? '+' : '';
+                                totalPriceEl.title = `Dynamic rate: ${sign}${pd.adjustment_pct}% (${(pd.rules_applied || []).join(', ')})`;
+                            }
+                        }
+                    }
+                })
+                .catch(() => {}); // pricing fetch failure is non-fatal
         }
 
         function initPickers() {
@@ -705,6 +722,50 @@ function loadRoomDetails() {
             checkoutInput.addEventListener('change', updateTotalPrice);
         }
 
+        // Inject HotelRoom JSON-LD schema for this room (Google Hotel Ads + rich results)
+        function injectRoomSchema(roomData, dynamicPrice) {
+            const price = dynamicPrice || roomData.numericPrice;
+            const schema = {
+                "@context": "https://schema.org",
+                "@type": "HotelRoom",
+                "name": roomData.name,
+                "description": roomData.fullDescription,
+                "url": `https://kanchifarmstay.com/room-details.html?id=${roomData.id}`,
+                "image": (roomData.images || [roomData.image]).map(img =>
+                    img.startsWith('http') ? img : `https://kanchifarmstay.com/${img}`
+                ),
+                "occupancy": {
+                    "@type": "QuantitativeValue",
+                    "maxValue": parseInt(roomData.capacity) || 4
+                },
+                "offers": {
+                    "@type": "Offer",
+                    "priceCurrency": "INR",
+                    "price": price,
+                    "priceValidUntil": new Date(Date.now() + 86400000).toISOString().split('T')[0],
+                    "availability": "https://schema.org/InStock",
+                    "url": `https://kanchifarmstay.com/room-details.html?id=${roomData.id}`,
+                    "seller": {
+                        "@type": "Organization",
+                        "name": "Kanchi Farm Stay"
+                    }
+                }
+            };
+            const s = document.createElement('script');
+            s.type = 'application/ld+json';
+            s.textContent = JSON.stringify(schema, null, 2);
+            document.head.appendChild(s);
+
+            // Also update OG title/description to be room-specific
+            const ogTitle = document.querySelector('meta[property="og:title"]');
+            const ogDesc  = document.querySelector('meta[property="og:description"]');
+            const ogImg   = document.querySelector('meta[property="og:image"]');
+            if (ogTitle) ogTitle.content = `${roomData.name} | Kanchi Farm Stay`;
+            if (ogDesc)  ogDesc.content  = roomData.fullDescription ? roomData.fullDescription.substring(0, 200) : '';
+            if (ogImg && roomData.image) ogImg.content = roomData.image.startsWith('http') ? roomData.image : `https://kanchifarmstay.com/${roomData.image}`;
+            document.title = `${roomData.name} | Kanchi Farm Stay`;
+        }
+
         // Fetch blocked dates from channel manager, then init
         fetch(`channel-manager/availability-api.php?room=${encodeURIComponent(room.id)}`)
             .then(r => r.json())
@@ -712,11 +773,14 @@ function loadRoomDetails() {
                 blockedRanges = data.blocked || [];
                 loadAvailabilityCalendar(room.id, blockedRanges);
                 initPickers();
+                // Inject schema with base price; will update once dates are chosen
+                injectRoomSchema(room, null);
             })
             .catch(() => {
                 // API unavailable — init pickers without blocking
                 initPickers();
                 loadAvailabilityCalendar(room.id, []);
+                injectRoomSchema(room, null);
             });
 
         // ── Razorpay payment ──────────────────────────────────────────

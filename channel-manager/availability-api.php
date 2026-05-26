@@ -29,4 +29,21 @@ if (!$roomId || !isset($rooms[$roomId])) {
 $ranges  = getBlockedRanges($roomId);
 $blocked = array_map(fn($r) => [$r['check_in'], $r['check_out']], $ranges);
 
-echo json_encode(['room' => $roomId, 'blocked' => $blocked]);
+$response = ['room' => $roomId, 'blocked' => $blocked];
+
+// Optional: return dynamic price for the requested dates
+if (!empty($_GET['pricing']) && !empty($_GET['check_in']) && !empty($_GET['check_out'])) {
+    require_once __DIR__ . '/pricing-engine.php';
+    $checkIn  = $_GET['check_in'];
+    $checkOut = $_GET['check_out'];
+    // Basic date validation
+    if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $checkIn) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $checkOut) && $checkOut > $checkIn) {
+        $pricing = calculateDynamicPrice($roomId, $checkIn, $checkOut);
+        $response['price']          = $pricing['final_price'];
+        $response['base_price']     = $pricing['base_price'];
+        $response['adjustment_pct'] = $pricing['adjustment_pct'];
+        $response['rules_applied']  = $pricing['rules_applied'];
+    }
+}
+
+echo json_encode($response);

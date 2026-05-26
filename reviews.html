@@ -4,8 +4,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Customer Reviews | Kanchi Farm Stay</title>
-    <meta name="description" content="Read genuine customer reviews of Kanchi Farm Stay from Google, Airbnb and Booking.com. See why guests love our farm retreat near Kanchipuram.">
+    <title>Guest Reviews | Kanchi Farm Stay</title>
+    <meta name="description" content="Read genuine guest reviews of Kanchi Farm Stay from Google, Airbnb and Booking.com. See why guests love our farm retreat near Kanchipuram.">
+    <link rel="canonical" href="https://kanchifarmstay.com/reviews.html">
+    <!-- Open Graph -->
+    <meta property="og:type"        content="website">
+    <meta property="og:site_name"   content="Kanchi Farm Stay">
+    <meta property="og:title"       content="Guest Reviews | Kanchi Farm Stay">
+    <meta property="og:description" content="Read genuine guest reviews of Kanchi Farm Stay from Google, Airbnb and Booking.com. Rated 4.9/5 by over 47 guests.">
+    <meta property="og:url"         content="https://kanchifarmstay.com/reviews.html">
+    <meta property="og:image"       content="https://kanchifarmstay.com/assets/images/farm-hero.jpg">
+    <!-- Twitter Card -->
+    <meta name="twitter:card"        content="summary_large_image">
+    <meta name="twitter:title"       content="Guest Reviews | Kanchi Farm Stay — Rated 4.9/5">
+    <meta name="twitter:description" content="See why guests love Kanchi Farm Stay. Read reviews from Google, Airbnb and Booking.com.">
+    <meta name="twitter:image"       content="https://kanchifarmstay.com/assets/images/farm-hero.jpg">
     <link rel="icon" type="image/svg+xml" href="assets/images/favicon.ico">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -18,7 +31,7 @@
     <div class="reviews-page">
         <section class="reviews-header">
             <div class="container">
-                <h1>Customer Reviews</h1>
+                <h1>Guest Reviews</h1>
                 <p>See what our guests are saying about their stay at Kanchi Farm Stay</p>
             </div>
         </section>
@@ -26,7 +39,7 @@
         <section class="section">
             <div class="container">
                 <div class="filter-buttons">
-                    <button class="filter-btn active" onclick="filterReviews('all')">Customer Reviews</button>
+                    <button class="filter-btn active" onclick="filterReviews('all')">All Reviews</button>
                     <button class="filter-btn" onclick="filterReviews('google')">Google</button>
                     <button class="filter-btn" onclick="filterReviews('airbnb')">Airbnb</button>
                     <button class="filter-btn" onclick="filterReviews('booking')">Booking.com</button>
@@ -44,7 +57,40 @@
     <div id="footer-placeholder"></div>
 
     <!-- Scripts -->
-    <script src="script.js?v=5"></script>
+    <script src="script.js?v=4"></script>
+
+    <!-- Structured Data: AggregateRating for review page -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      "name": "Kanchi Farm Stay",
+      "url": "https://kanchifarmstay.com",
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.9",
+        "reviewCount": "47",
+        "bestRating": "5",
+        "worstRating": "1"
+      },
+      "review": [
+        {
+          "@type": "Review",
+          "author": {"@type": "Person", "name": "Jayanthi Gurureddy"},
+          "reviewRating": {"@type": "Rating", "ratingValue": "5", "bestRating": "5"},
+          "reviewBody": "Amazing home stay with super food. Highly recommend for family to spend quality time here.",
+          "publisher": {"@type": "Organization", "name": "Google"}
+        },
+        {
+          "@type": "Review",
+          "author": {"@type": "Person", "name": "Verified Guest"},
+          "reviewRating": {"@type": "Rating", "ratingValue": "5", "bestRating": "5"},
+          "reviewBody": "Wonderful experience at Kanchi Farm Stay. The rustic ambiance and farm-fresh food made our stay truly memorable.",
+          "publisher": {"@type": "Organization", "name": "Airbnb"}
+        }
+      ]
+    }
+    </script>
 </body>
 
 </html>

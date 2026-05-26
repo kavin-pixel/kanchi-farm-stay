@@ -70,7 +70,8 @@ function syncOneCalendar(array $cal): array {
     curl_close($ch);
 
     if (!$raw || $httpCode !== 200) {
-        return ['success' => false, 'error' => "HTTP {$httpCode}", 'imported' => 0, 'new_bookings' => []];
+        updateCalendarSyncStatus($cal['id'], false, 0, "HTTP {$httpCode}");
+    return ['success' => false, 'error' => "HTTP {$httpCode}", 'imported' => 0, 'new_bookings' => []];
     }
 
     $events      = parseIcalFeed($raw);
@@ -169,6 +170,12 @@ function syncOneCalendar(array $cal): array {
         if ($id !== false) {
             $imported++;
             $newBookings[] = $booking;
+
+            // Update channel stats for newly imported booking
+            $nights    = (int)((strtotime($checkOut) - strtotime($checkIn)) / 86400);
+            $basePrice = ROOM_BASE_PRICES[$roomId] ?? 0;
+            $grossRev  = $basePrice * $nights;
+            upsertChannelStat($roomId, $platform, $grossRev, $nights, 1 /* property_id */);
         }
     }
 
@@ -187,6 +194,7 @@ function syncOneCalendar(array $cal): array {
     }
 
     touchLastSynced($cal['id']);
+    updateCalendarSyncStatus($cal['id'], true, $imported);
 
     return ['success' => true, 'imported' => $imported, 'new_bookings' => $newBookings, 'error' => ''];
 }

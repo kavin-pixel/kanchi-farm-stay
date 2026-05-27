@@ -152,7 +152,7 @@ const rooms = [
         capacity: "3 Adults, 1 Child",
         size: "Contact for details",
         airbnbUrl: "https://airbnb.co.in/h/kanchifarmstay-woodencottage",
-        bookingUrl: "index.html#contact"
+        bookingUrl: "contact.html"
     },
     {
         id: 'kanchi-farm-stay',
@@ -215,8 +215,8 @@ const rooms = [
             "assets/images/treehouse-1.jpg",
             "assets/images/treehouse-2.jpg"
         ],
-        price: "Contact Us",
-        numericPrice: 0,
+        price: "₹1,500 / night",
+        numericPrice: 1500,
         capacity: "2 Guests",
         size: "Treetop Cabin",
         airbnbUrl: "contact.html",

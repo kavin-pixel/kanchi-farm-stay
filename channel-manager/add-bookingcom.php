@@ -4,9 +4,9 @@ require_once __DIR__ . '/db.php';
 header('Content-Type: text/plain; charset=utf-8');
 
 $channels = [
-    ['wooden-villa', 'booking.com', 'https://ical.booking.com/v1/export?t=6bb81e0d-cb06-42ec-9f7e-5e1a19b907e0'],
-    ['white-villa',  'booking.com', 'https://ical.booking.com/v1/export?t=4aac9520-5466-4ce8-82f8-cc32f5feb37f'],
-    ['natures-nest', 'booking.com', 'https://ical.booking.com/v1/export?t=815d4e0e-4bcd-4b16-ac72-553622671b06'],
+    ['wooden-villa', 'booking.com', 'https://ical.booking.com/v1/export?t=channel-manager-ui'],
+    ['white-villa',  'booking.com', 'https://ical.booking.com/v1/export?t=channel-manager-ui'],
+    ['natures-nest', 'booking.com', 'https://ical.booking.com/v1/export?t=channel-manager-ui'],
 ];
 
 $db = getDB();

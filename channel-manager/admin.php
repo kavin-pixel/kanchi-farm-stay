@@ -429,43 +429,88 @@ function bookingOnDay(array $bookings, string $date): ?array {
     <!-- ════════════ CALENDAR (GANTT) ════════════ -->
     <div id="sec-calendar" class="section-pane <?= $section==='calendar'?'active':'' ?>">
       <div class="panel">
-        <div class="panel-hd">
-          <div><h3>Multi-Property Calendar</h3><div class="sub">60-day view — scroll right for more dates</div></div>
+        <div class="panel-hd" style="flex-wrap:wrap;gap:.75rem;">
+          <div class="cal-toolbar" style="margin:0;flex:1;">
+            <h3 style="margin:0;">Availability Calendar</h3>
+            <button class="cal-nav-btn active" id="cal-btn-30" onclick="setCalRange(30)">30 days</button>
+            <button class="cal-nav-btn" id="cal-btn-60" onclick="setCalRange(60)">60 days</button>
+            <button class="cal-nav-btn" onclick="scrollToToday()">↩ Today</button>
+          </div>
+          <button class="cal-add-btn" onclick="openDrawer()">+ Add Booking</button>
         </div>
-        <div class="panel-bd">
-          <div class="gantt-legend">
-            <?php foreach (['direct'=>'Direct','airbnb'=>'Airbnb','booking.com'=>'Booking.com','agoda'=>'Agoda','makemytrip'=>'MakeMyTrip','manual'=>'Manual/Phone','blocked'=>'Blocked'] as $src => $lbl): ?>
+        <div class="panel-bd" style="padding-top:.75rem;padding-bottom:.75rem;">
+
+          <!-- Legend -->
+          <div class="gantt-legend" style="margin-bottom:.9rem;">
+            <?php foreach (['direct'=>'Direct','airbnb'=>'Airbnb','booking.com'=>'Booking.com','agoda'=>'Agoda','makemytrip'=>'MakeMyTrip','manual'=>'Walk-in / Phone','blocked'=>'Blocked'] as $src => $lbl): ?>
               <div class="gl-item"><div class="gl-dot" style="background:<?= sourceColor($src) ?>"></div><?= $lbl ?></div>
             <?php endforeach; ?>
-            <div class="gl-item"><div class="gl-dot" style="background:#e8f5e9;border:1px solid #a5d6a7;"></div>Today</div>
+            <div class="gl-item"><div class="gl-dot" style="background:var(--accent-light);border:2px solid var(--accent);"></div>Today</div>
+            <div class="gl-item" style="margin-left:auto;font-size:.72rem;color:var(--text-lo);">Click any empty cell to add a booking</div>
           </div>
 
-          <div class="gantt-wrap">
-            <table class="gantt-table">
+          <div class="gantt-wrap" id="gantt-wrap">
+            <table class="gantt-table" id="gantt-table">
               <thead>
+                <!-- Month label row -->
+                <tr id="gantt-month-row">
+                  <th class="gantt-room-col" style="background:var(--sb-bg);border-right:2px solid var(--border-strong);"></th>
+                  <?php
+                  $prevMonth = '';
+                  $monthSpan = 0;
+                  $monthCells = []; // [{month, span}]
+                  foreach ($ganttDates as $gd) {
+                    $m = date('M Y', strtotime($gd));
+                    if ($m !== $prevMonth) {
+                      if ($prevMonth) $monthCells[] = ['month'=>$prevMonth,'span'=>$monthSpan];
+                      $prevMonth = $m; $monthSpan = 1;
+                    } else { $monthSpan++; }
+                  }
+                  if ($prevMonth) $monthCells[] = ['month'=>$prevMonth,'span'=>$monthSpan];
+                  foreach ($monthCells as $mc):
+                  ?>
+                    <th colspan="<?= $mc['span'] ?>" style="background:var(--sb-bg);border-right:1px solid rgba(255,255,255,.08);padding:0;">
+                      <div class="gantt-month-hdr"><?= $mc['month'] ?></div>
+                    </th>
+                  <?php endforeach; ?>
+                </tr>
+                <!-- Day header row -->
                 <tr>
-                  <th class="gantt-room-col"><div class="gantt-hdr-room">Property</div></th>
+                  <th class="gantt-room-col" style="border-right:2px solid var(--border-strong);">
+                    <div class="gantt-hdr-room">Property</div>
+                  </th>
                   <?php foreach ($ganttDates as $gd):
                     $dow = date('D', strtotime($gd));
                     $isToday = $gd === date('Y-m-d');
                     $isWkend = in_array($dow, ['Sat','Sun']);
+                    $isMonthStart = date('j', strtotime($gd)) === '1';
                   ?>
-                    <th class="gantt-day-col <?= $isToday?'today-col':($isWkend?'weekend-col':'') ?>">
+                    <th class="gantt-day-col <?= $isToday?'today-col':($isWkend?'weekend-col':'') ?>"
+                        id="<?= $isToday?'gantt-today':'' ?>"
+                        style="<?= $isMonthStart?'border-left:2px solid var(--border-strong);':'' ?>">
                       <div class="gantt-hdr-day">
                         <span class="d-num"><?= (int)date('d', strtotime($gd)) ?></span>
-                        <span class="d-dow"><?= substr($dow,0,2) ?></span>
+                        <span class="d-dow"><?= substr($dow,0,1) ?></span>
                       </div>
                     </th>
                   <?php endforeach; ?>
                 </tr>
               </thead>
               <tbody>
-                <?php foreach ($rooms as $rid => $rname):
+                <?php
+                $roomColors = ['#6366F1','#F97316','#10B981','#3B82F6','#EC4899','#8B5CF6','#14B8A6','#F59E0B','#EF4444','#06B6D4'];
+                $roomIdx = 0;
+                foreach ($rooms as $rid => $rname):
                   $roomBks = $bookingsByRoom[$rid] ?? [];
+                  $roomColor = $roomColors[$roomIdx % count($roomColors)];
+                  $roomIdx++;
                   $i = 0;
                 ?>
                 <tr>
-                  <td class="gantt-room-label"><?= htmlspecialchars($rname) ?></td>
+                  <td class="gantt-room-label" style="border-right:2px solid var(--border-strong);">
+                    <div class="room-dot" style="background:<?= $roomColor ?>"></div>
+                    <span style="font-size:.78rem;"><?= htmlspecialchars($rname) ?></span>
+                  </td>
                   <?php
                   while ($i < count($ganttDates)):
                     $gd   = $ganttDates[$i];
@@ -474,9 +519,9 @@ function bookingOnDay(array $bookings, string $date): ?array {
                     $isToday = $gd === date('Y-m-d');
                     $isPast  = $gd < date('Y-m-d');
                     $isWkend = in_array($dow, ['Sat','Sun']);
+                    $isMonthStart = date('j', strtotime($gd)) === '1';
 
                     if ($bk):
-                      // Calculate colspan (how many days this booking spans within our view)
                       $span = 1;
                       for ($j = $i+1; $j < count($ganttDates); $j++) {
                           if ($ganttDates[$j] >= $bk['check_out']) break;
@@ -484,16 +529,25 @@ function bookingOnDay(array $bookings, string $date): ?array {
                       }
                       $isFirst = ($gd === $bk['check_in'] || $i === 0);
                       $clr = sourceColor($bk['source']);
-                      $tip = htmlspecialchars("{$bk['guest_name']} | ".sourceName($bk['source'])." | {$bk['check_in']} → {$bk['check_out']}");
+                      $isBlock = $bk['source'] === 'blocked';
+                      $nightCount = nights($bk['check_in'], $bk['check_out']);
+                      $tip = "{$bk['guest_name']} · ".sourceName($bk['source'])." · {$bk['check_in']} → {$bk['check_out']} ({$nightCount}n)";
+                      if ($bk['amount'] > 0) $tip .= " · ₹".number_format($bk['amount']);
                   ?>
-                      <td colspan="<?= $span ?>" class="gantt-booking <?= $isPast?'booked-past':'' ?>" title="<?= $tip ?>">
+                      <td colspan="<?= $span ?>" class="gantt-booking"
+                          style="<?= $isMonthStart?'border-left:2px solid var(--border-strong);':'' ?>"
+                          title="<?= htmlspecialchars($tip) ?>">
                         <?php if ($isFirst): ?>
-                          <div class="gantt-bk-inner" style="background:<?= $clr ?>;opacity:<?= $isPast?.5:1 ?>;">
-                            <span class="bk-guest"><?= htmlspecialchars(substr($bk['guest_name'],0,14)) ?></span>
-                            <span class="bk-src"><?= htmlspecialchars(strtoupper(substr($bk['source'],0,3))) ?></span>
+                          <div class="gantt-bk-inner <?= $isBlock?'is-block':'' ?>"
+                               style="background:<?= $clr ?>;opacity:<?= $isPast?.45:1 ?>;">
+                            <?php if (!$isBlock): ?>
+                              <span class="bk-guest"><?= htmlspecialchars(substr($bk['guest_name'],0,16)) ?></span>
+                              <span class="bk-src" style="margin-left:.35rem;opacity:.75;font-size:.62rem;"><?= htmlspecialchars(strtoupper(substr($bk['source'],0,3))) ?></span>
+                            <?php endif; ?>
                           </div>
                         <?php else: ?>
-                          <div class="gantt-bk-inner" style="background:<?= $clr ?>;opacity:<?= $isPast?.5:1 ?>;"></div>
+                          <div class="gantt-bk-inner <?= $isBlock?'is-block':'' ?>"
+                               style="background:<?= $clr ?>;opacity:<?= $isPast?.45:1 ?>;"></div>
                         <?php endif; ?>
                       </td>
                   <?php
@@ -502,9 +556,13 @@ function bookingOnDay(array $bookings, string $date): ?array {
                       $cls = 'gantt-day-free';
                       if ($isToday)  $cls .= ' today-day';
                       if ($isWkend)  $cls .= ' weekend-day';
-                      if ($isPast)   $cls = 'gantt-day-past';
+                      if ($isPast)   $cls  = 'gantt-day-past';
                   ?>
-                      <td class="<?= $cls ?>"></td>
+                      <td class="<?= $cls ?>"
+                          style="<?= $isMonthStart?'border-left:2px solid var(--border-strong);':'' ?>"
+                          <?= !$isPast ? "onclick=\"openDrawer('".htmlspecialchars($rid)."','".htmlspecialchars($gd)."')\"" : '' ?>
+                          title="<?= !$isPast ? htmlspecialchars("Add booking: $rname on $gd") : '' ?>">
+                      </td>
                   <?php
                       $i++;
                     endif;
@@ -515,6 +573,7 @@ function bookingOnDay(array $bookings, string $date): ?array {
               </tbody>
             </table>
           </div>
+
         </div>
       </div>
     </div>
@@ -522,50 +581,18 @@ function bookingOnDay(array $bookings, string $date): ?array {
     <!-- ════════════ BOOKINGS ════════════ -->
     <div id="sec-bookings" class="section-pane <?= $section==='bookings'?'active':'' ?>">
 
-      <!-- Add Booking -->
-      <div class="panel">
-        <div class="panel-hd"><h3>Add / Block Dates</h3></div>
-        <div class="panel-bd">
-          <form method="POST">
-            <input type="hidden" name="action" value="add_booking">
-            <div class="form-grid wide-last">
-              <div class="fld">
-                <label>Property *</label>
-                <select name="room_id" required>
-                  <?php foreach ($rooms as $rid => $rn): ?><option value="<?= $rid ?>"><?= htmlspecialchars($rn) ?></option><?php endforeach; ?>
-                </select>
-              </div>
-              <div class="fld"><label>Check-in *</label><input type="date" name="check_in" required></div>
-              <div class="fld"><label>Check-out *</label><input type="date" name="check_out" required></div>
-              <div class="fld"><label>Guest Name</label><input type="text" name="guest_name" placeholder="Ravi Kumar"></div>
-              <div class="fld"><label>Phone</label><input type="tel" name="guest_phone" placeholder="+91 98765 43210"></div>
-              <div class="fld"><label>Email</label><input type="email" name="guest_email" placeholder="guest@email.com"></div>
-              <div class="fld"><label>Amount (₹)</label><input type="number" name="amount" min="0" step="1" placeholder="0"></div>
-              <div class="fld">
-                <label>Source</label>
-                <select name="source">
-                  <option value="manual">Manual / Phone</option>
-                  <option value="direct">Direct (Website)</option>
-                  <option value="airbnb">Airbnb</option>
-                  <option value="booking.com">Booking.com</option>
-                  <option value="agoda">Agoda</option>
-                  <option value="makemytrip">MakeMyTrip</option>
-                  <option value="blocked">Block (maintenance)</option>
-                </select>
-              </div>
-              <div class="fld"><label>Notes</label><textarea name="notes" placeholder="Optional notes..."></textarea></div>
-            </div>
-            <button type="submit" class="btn btn-primary" style="margin-top:1rem;">+ Add Booking &amp; Notify WhatsApp</button>
-          </form>
+      <!-- Bookings toolbar -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:.75rem;">
+        <div>
+          <div style="font-size:1rem;font-weight:700;color:var(--text-hi);">All Bookings</div>
+          <div style="font-size:.78rem;color:var(--text-lo);margin-top:.1rem;"><?= count($allBookings) ?> total reservations</div>
         </div>
+        <button class="cal-add-btn" onclick="openDrawer()">+ Add Booking</button>
       </div>
 
       <!-- Bookings table -->
       <div class="panel">
         <div class="panel-hd">
-          <h3>All Bookings</h3>
-          <span style="font-size:.8rem;color:var(--text-muted);"><?= count($allBookings) ?> total</span>
-        </div>
         <div class="panel-bd" style="padding-bottom:0;">
           <div class="search-bar">
             <input type="text" id="bk-search" placeholder="Search guest, room, ref…" oninput="filterBookings()">
@@ -786,8 +813,219 @@ function bookingOnDay(array $bookings, string $date): ?array {
 </div><!-- /main -->
 </div><!-- /layout -->
 
+<!-- ═══ BOOKING DRAWER ═══════════════════════════════════════════ -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="bookingDrawer">
+  <div class="drawer-head">
+    <div>
+      <h2 id="drawerTitle">New Booking</h2>
+      <p id="drawerSub">Fill in the details below to confirm a reservation</p>
+    </div>
+    <button class="drawer-close" onclick="closeDrawer()">✕</button>
+  </div>
+  <div class="drawer-body">
+    <form method="POST" id="drawerForm">
+      <input type="hidden" name="action" value="add_booking">
+
+      <!-- Type toggle -->
+      <div class="bk-type-toggle" id="bkTypeToggle">
+        <button type="button" class="bk-type-btn active" onclick="setBkType('guest')" id="btnGuest">🧑 Guest Booking</button>
+        <button type="button" class="bk-type-btn" onclick="setBkType('block')" id="btnBlock">🔒 Block Dates</button>
+      </div>
+
+      <!-- Property & Dates -->
+      <div class="drawer-section">
+        <div class="drawer-section-label">Property &amp; Dates</div>
+        <div class="fld">
+          <label>Property *</label>
+          <select name="room_id" id="drawer-room" required onchange="updateAmountHint()">
+            <?php foreach ($rooms as $rid => $rn): ?><option value="<?= $rid ?>"><?= htmlspecialchars($rn) ?></option><?php endforeach; ?>
+          </select>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.85rem;">
+          <div class="fld">
+            <label>Check-in *</label>
+            <input type="date" name="check_in" id="drawer-checkin" required onchange="updateNights();updateAmountHint()">
+          </div>
+          <div class="fld">
+            <label>Check-out *</label>
+            <input type="date" name="check_out" id="drawer-checkout" required onchange="updateNights();updateAmountHint()">
+          </div>
+        </div>
+        <div id="nights-display" style="display:none;">
+          <span class="nights-pill" id="nights-pill">1 night</span>
+        </div>
+      </div>
+
+      <!-- Guest Details (hidden when blocking) -->
+      <div class="drawer-section" id="guestSection">
+        <div class="drawer-section-label">Guest Details</div>
+        <div class="fld">
+          <label>Guest Name *</label>
+          <input type="text" name="guest_name" id="drawer-name" placeholder="Ravi Kumar" required>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.85rem;">
+          <div class="fld">
+            <label>Phone</label>
+            <input type="tel" name="guest_phone" placeholder="+91 98765 43210">
+          </div>
+          <div class="fld">
+            <label>Email</label>
+            <input type="email" name="guest_email" placeholder="guest@email.com">
+          </div>
+        </div>
+      </div>
+
+      <!-- Payment & Source -->
+      <div class="drawer-section" id="paymentSection">
+        <div class="drawer-section-label">Payment &amp; Source</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.85rem;">
+          <div class="fld">
+            <label>Amount (₹)</label>
+            <input type="number" name="amount" id="drawer-amount" min="0" step="1" placeholder="0">
+            <div class="amount-hint" id="amount-hint"></div>
+          </div>
+          <div class="fld">
+            <label>Source</label>
+            <select name="source" id="drawer-source">
+              <option value="manual">Walk-in / Phone</option>
+              <option value="direct">Direct (Website)</option>
+              <option value="airbnb">Airbnb</option>
+              <option value="booking.com">Booking.com</option>
+              <option value="agoda">Agoda</option>
+              <option value="makemytrip">MakeMyTrip</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notes -->
+      <div class="drawer-section">
+        <div class="drawer-section-label">Notes</div>
+        <div class="fld">
+          <textarea name="notes" rows="3" placeholder="Special requests, dietary needs, room preferences…" style="margin:0;"></textarea>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="drawer-foot">
+    <button type="button" class="btn btn-secondary" onclick="closeDrawer()">Cancel</button>
+    <button type="submit" form="drawerForm" class="btn btn-primary" id="drawerSubmitBtn">💾 Save &amp; Notify WhatsApp</button>
+  </div>
+</div>
+
 <script>
-const sectionTitles = { dashboard:'Dashboard', calendar:'Multi-Property Calendar', bookings:'Bookings', channels:'Channels', export:'iCal Export' };
+const sectionTitles = { dashboard:'Dashboard', calendar:'Availability Calendar', bookings:'Bookings', channels:'Channels', export:'iCal Export' };
+
+// ── Room base prices (for amount hint) ─────────────────────────
+const roomPrices = <?= json_encode(
+  array_combine(array_keys(ROOM_IDS), array_map(fn($rid) => ROOM_BASE_PRICES[$rid] ?? 0, array_keys(ROOM_IDS)))
+) ?>;
+const roomPriceMap = roomPrices;
+
+// ── Drawer ─────────────────────────────────────────────────────
+let currentBkType = 'guest';
+
+function openDrawer(roomId = '', date = '') {
+  document.getElementById('drawerOverlay').classList.add('open');
+  document.getElementById('bookingDrawer').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  if (roomId) document.getElementById('drawer-room').value = roomId;
+  if (date) {
+    document.getElementById('drawer-checkin').value = date;
+    // Auto-set checkout to next day
+    const next = new Date(date);
+    next.setDate(next.getDate() + 1);
+    document.getElementById('drawer-checkout').value = next.toISOString().split('T')[0];
+    updateNights(); updateAmountHint();
+  }
+  setBkType('guest');
+  setTimeout(() => document.getElementById('drawer-room').focus(), 200);
+}
+
+function closeDrawer() {
+  document.getElementById('drawerOverlay').classList.remove('open');
+  document.getElementById('bookingDrawer').classList.remove('open');
+  document.body.style.overflow = '';
+  document.getElementById('drawerForm').reset();
+  document.getElementById('nights-display').style.display = 'none';
+  document.getElementById('amount-hint').textContent = '';
+}
+
+function setBkType(type) {
+  currentBkType = type;
+  const isBlock = type === 'block';
+  document.getElementById('btnGuest').classList.toggle('active', !isBlock);
+  document.getElementById('btnBlock').classList.toggle('active', isBlock);
+  document.getElementById('guestSection').style.display = isBlock ? 'none' : '';
+  document.getElementById('paymentSection').style.display = isBlock ? 'none' : '';
+  document.getElementById('drawerTitle').textContent = isBlock ? 'Block Dates' : 'New Booking';
+  document.getElementById('drawerSub').textContent = isBlock
+    ? 'Block these dates for maintenance or personal use'
+    : 'Fill in the details below to confirm a reservation';
+  document.getElementById('drawerSubmitBtn').textContent = isBlock ? '🔒 Block Dates' : '💾 Save & Notify WhatsApp';
+
+  const nameInput = document.getElementById('drawer-name');
+  if (isBlock) {
+    nameInput.removeAttribute('required');
+    nameInput.value = 'Blocked';
+    // Set source hidden
+    document.getElementById('drawer-source') && (document.getElementById('drawer-source').value = 'blocked');
+  } else {
+    nameInput.setAttribute('required', '');
+    if (nameInput.value === 'Blocked') nameInput.value = '';
+  }
+}
+
+function updateNights() {
+  const ci = document.getElementById('drawer-checkin').value;
+  const co = document.getElementById('drawer-checkout').value;
+  if (!ci || !co) { document.getElementById('nights-display').style.display = 'none'; return; }
+  const n = Math.round((new Date(co) - new Date(ci)) / 86400000);
+  if (n <= 0) { document.getElementById('nights-display').style.display = 'none'; return; }
+  document.getElementById('nights-display').style.display = 'block';
+  document.getElementById('nights-pill').textContent = n === 1 ? '1 night' : n + ' nights';
+}
+
+function updateAmountHint() {
+  const rid = document.getElementById('drawer-room').value;
+  const ci  = document.getElementById('drawer-checkin').value;
+  const co  = document.getElementById('drawer-checkout').value;
+  const hint = document.getElementById('amount-hint');
+  if (!ci || !co || !rid) { hint.textContent = ''; return; }
+  const n = Math.round((new Date(co) - new Date(ci)) / 86400000);
+  if (n <= 0) { hint.textContent = ''; return; }
+  const base = roomPriceMap[rid] ?? 0;
+  if (!base) { hint.textContent = ''; return; }
+  const suggested = base * n;
+  hint.textContent = `Suggested: ₹${base.toLocaleString('en-IN')} × ${n} = ₹${suggested.toLocaleString('en-IN')}`;
+  if (!document.getElementById('drawer-amount').value) {
+    document.getElementById('drawer-amount').value = suggested;
+  }
+}
+
+// ── Calendar range toggle ──────────────────────────────────────
+function setCalRange(days) {
+  document.getElementById('cal-btn-30').classList.toggle('active', days === 30);
+  document.getElementById('cal-btn-60').classList.toggle('active', days === 60);
+  // Show/hide columns beyond 30
+  const tbl = document.getElementById('gantt-table');
+  if (!tbl) return;
+  const allCols = tbl.querySelectorAll('col, thead tr:last-child th, tbody td');
+  // Use CSS: hide columns > days via class toggle
+  tbl.classList.toggle('range-30', days === 30);
+  tbl.classList.toggle('range-60', days !== 30);
+}
+
+function scrollToToday() {
+  const el = document.getElementById('gantt-today');
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+}
+
+// Scroll to today on calendar load
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(scrollToToday, 150);
+});
 
 function goTo(sec) {
     document.querySelectorAll('.section-pane').forEach(p => p.classList.remove('active'));

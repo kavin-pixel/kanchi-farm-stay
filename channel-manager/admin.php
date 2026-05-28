@@ -675,9 +675,12 @@ function bookingOnDay(array $bookings, string $date): ?array {
           <div style="font-size:1rem;font-weight:700;color:var(--text-hi);">All Bookings</div>
           <div style="font-size:.77rem;color:var(--text-lo);margin-top:.1rem;" data-testid="bookings-total-count"><?= count($allBookings) ?> total reservations</div>
         </div>
-        <div style="display:flex;gap:.6rem;">
+        <div style="display:flex;gap:.6rem;flex-wrap:wrap;">
           <button class="btn btn-secondary btn-sm" onclick="exportBookings()" data-testid="btn-export-bookings">
             <i class="fa-solid fa-download"></i> Export
+          </button>
+          <button class="btn btn-secondary btn-sm" onclick="openQuickDirect()" data-tip="Quick direct booking (today→tomorrow, source: Direct)" data-testid="btn-quick-direct-bookings">
+            <i class="fa-solid fa-bolt" style="color:var(--accent);"></i> Quick Direct
           </button>
           <button class="cal-add-btn" onclick="openDrawer()" data-testid="btn-add-booking-bookings">
             <i class="fa-solid fa-plus"></i> New Booking
@@ -710,10 +713,20 @@ function bookingOnDay(array $bookings, string $date): ?array {
             <option value="confirmed">Confirmed</option>
             <option value="cancelled">Cancelled</option>
           </select>
+          <select id="bk-sort" onchange="sortBookings()" data-testid="select-sort-bookings" data-tip="Sort bookings">
+            <option value="checkin-desc">Check-in: newest first</option>
+            <option value="checkin-asc">Check-in: oldest first</option>
+            <option value="created-desc" selected>Recently added</option>
+            <option value="created-asc">Oldest added</option>
+            <option value="checkout-asc">Check-out: soonest</option>
+            <option value="checkout-desc">Check-out: latest</option>
+            <option value="amount-desc">Amount: high → low</option>
+            <option value="amount-asc">Amount: low → high</option>
+          </select>
           <span id="bk-result-count" style="font-size:.77rem;color:var(--text-xlo);margin-left:auto;"></span>
         </div>
 
-        <div class="tbl-wrap">
+        <div class="tbl-wrap bookings-cards">
           <table class="tbl" id="bk-table" data-testid="bookings-table">
             <thead>
               <tr>
@@ -732,7 +745,7 @@ function bookingOnDay(array $bookings, string $date): ?array {
             </thead>
             <tbody>
               <?php if (empty($allBookings)): ?>
-                <tr><td colspan="11" style="text-align:center;padding:2.5rem;color:var(--text-xlo);">
+                <tr class="row-empty"><td colspan="11" style="text-align:center;padding:2.5rem;color:var(--text-xlo);">
                   <i class="fa-regular fa-calendar" style="font-size:1.5rem;display:block;margin-bottom:.5rem;opacity:.4;"></i>
                   No bookings yet.
                 </td></tr>
@@ -741,28 +754,31 @@ function bookingOnDay(array $bookings, string $date): ?array {
                   $n = nights($b['check_in'], $b['check_out']);
                 ?>
                 <tr data-room="<?= $b['room_id'] ?>" data-src="<?= htmlspecialchars($b['source']) ?>" data-status="<?= $b['status'] ?>"
+                    data-checkin="<?= htmlspecialchars($b['check_in']) ?>"
+                    data-checkout="<?= htmlspecialchars($b['check_out']) ?>"
+                    data-amount="<?= (float)($b['amount'] ?? 0) ?>"
+                    data-id="<?= (int)$b['id'] ?>"
                     data-search="<?= strtolower(htmlspecialchars($b['guest_name'].' '.$b['room_name'].' '.$b['booking_ref'])) ?>"
                     data-testid="booking-row-<?= $b['id'] ?>">
-                  <td class="muted hide-mobile"><?= $b['id'] ?></td>
-                  <td class="room-name"><?= htmlspecialchars($b['room_name']) ?></td>
-                  <td><?= date('d M Y', strtotime($b['check_in'])) ?></td>
-                  <td><?= date('d M Y', strtotime($b['check_out'])) ?></td>
-                  <td class="hide-mobile"><?= $n ?></td>
-                  <td class="guest">
-                    <?= htmlspecialchars($b['guest_name']) ?>
-                    <?php if ($b['guest_email']): ?><div class="muted"><?= htmlspecialchars($b['guest_email']) ?></div><?php endif; ?>
+                  <td class="muted hide-mobile" data-label="#"><?= $b['id'] ?></td>
+                  <td class="room-name cell-property" data-label="Property"><?= htmlspecialchars($b['room_name']) ?></td>
+                  <td data-label="Check-in"><?= date('d M Y', strtotime($b['check_in'])) ?></td>
+                  <td data-label="Check-out"><?= date('d M Y', strtotime($b['check_out'])) ?></td>
+                  <td class="hide-mobile" data-label="Nights"><?= $n ?></td>
+                  <td class="guest" data-label="Guest">
+                    <span><?= htmlspecialchars($b['guest_name']) ?><?php if ($b['guest_email']): ?><div class="muted"><?= htmlspecialchars($b['guest_email']) ?></div><?php endif; ?></span>
                   </td>
-                  <td class="muted hide-mobile"><?= htmlspecialchars($b['guest_phone']) ?></td>
-                  <td><?= badge($b['source']) ?></td>
-                  <td><?= $b['amount'] > 0 ? '₹'.number_format($b['amount']) : '<span class="muted">—</span>' ?></td>
-                  <td>
+                  <td class="muted hide-mobile" data-label="Phone"><?= htmlspecialchars($b['guest_phone']) ?></td>
+                  <td data-label="Source"><?= badge($b['source']) ?></td>
+                  <td data-label="Amount"><?= $b['amount'] > 0 ? '₹'.number_format($b['amount']) : '<span class="muted">—</span>' ?></td>
+                  <td data-label="Status">
                     <?php if ($b['status']==='confirmed'): ?>
                       <span class="status-confirmed"><i class="fa-solid fa-circle-check"></i> Confirmed</span>
                     <?php else: ?>
                       <span class="status-cancelled"><i class="fa-solid fa-ban"></i> Cancelled</span>
                     <?php endif; ?>
                   </td>
-                  <td style="white-space:nowrap;">
+                  <td class="cell-actions" style="white-space:nowrap;">
                     <?php if ($b['status']==='confirmed'): ?>
                       <form method="POST" style="display:inline;" onsubmit="return confirm('Cancel this booking?')">
                         <input type="hidden" name="action" value="cancel_booking">
@@ -1043,10 +1059,16 @@ function bookingOnDay(array $bookings, string $date): ?array {
   </div>
 </div>
 
-<!-- Mobile FAB -->
-<button class="fab" onclick="openDrawer()" data-tip="New booking (N)" data-testid="btn-fab-new-booking">
-  <i class="fa-solid fa-plus"></i>
-</button>
+<!-- Mobile FAB stack: quick-direct + full new booking -->
+<div class="fab-stack" data-testid="fab-stack">
+  <button class="fab fab-secondary" onclick="openDrawer()" data-tip="New booking (N)" data-testid="btn-fab-new-booking" aria-label="New booking">
+    <i class="fa-solid fa-plus"></i>
+  </button>
+  <button class="fab fab-primary" onclick="openQuickDirect()" data-tip="Quick direct booking" data-testid="btn-fab-quick-direct" aria-label="Quick direct booking">
+    <i class="fa-solid fa-bolt"></i>
+    <span class="fab-label">Direct&nbsp;Booking</span>
+  </button>
+</div>
 
 <!-- Keyboard Shortcuts Modal -->
 <div class="kb-modal-overlay" id="kb-modal">
@@ -1065,7 +1087,6 @@ function bookingOnDay(array $bookings, string $date): ?array {
   </div>
 </div>
 
-<div id="sidebar-overlay" class="sidebar-overlay"></div>
 <div id="ui-tooltip"></div>
 
 <script>
@@ -1150,10 +1171,26 @@ function goTo(sec) {
 }
 
 // ── Drawer ───────────────────────────────────────────────────────
-function openDrawer(roomId = '', date = '') {
+function openDrawer(roomId = '', date = '', opts = {}) {
   document.getElementById('drawerOverlay').classList.add('open');
   document.getElementById('bookingDrawer').classList.add('open');
   document.body.style.overflow = 'hidden';
+  setBkType('guest');
+  // Quick-direct mode: prefill source=direct, today + tomorrow, scroll-friendly
+  if (opts.quick) {
+    const today = new Date();
+    const tmrw  = new Date(today); tmrw.setDate(tmrw.getDate() + 1);
+    const fmt   = d => d.toISOString().split('T')[0];
+    document.getElementById('drawer-checkin').value  = fmt(today);
+    document.getElementById('drawer-checkout').value = fmt(tmrw);
+    const srcEl = document.getElementById('drawer-source');
+    if (srcEl) srcEl.value = 'direct';
+    document.getElementById('drawerTitle').textContent = 'Quick Direct Booking';
+    document.getElementById('drawerSub').textContent   = 'Tonight → tomorrow. Adjust dates if needed.';
+    updateNights(); updateAmountHint();
+    setTimeout(() => document.getElementById('drawer-name')?.focus(), 220);
+    return;
+  }
   if (roomId) document.getElementById('drawer-room').value = roomId;
   if (date) {
     document.getElementById('drawer-checkin').value = date;
@@ -1162,9 +1199,10 @@ function openDrawer(roomId = '', date = '') {
     document.getElementById('drawer-checkout').value = next.toISOString().split('T')[0];
     updateNights(); updateAmountHint();
   }
-  setBkType('guest');
   setTimeout(() => document.getElementById('drawer-room').focus(), 200);
 }
+
+function openQuickDirect() { openDrawer('', '', { quick: true }); }
 
 function closeDrawer() {
   document.getElementById('drawerOverlay').classList.remove('open');
@@ -1266,6 +1304,43 @@ function filterBookings() {
   const cntEl = document.getElementById('bk-result-count');
   if (cntEl) cntEl.textContent = (q||room||src||status) ? `${visible} result${visible!==1?'s':''}` : '';
 }
+
+// ── Bookings sort ────────────────────────────────────────────────
+function sortBookings() {
+  const sel = document.getElementById('bk-sort');
+  if (!sel) return;
+  const [field, dir] = sel.value.split('-');
+  const mult = dir === 'desc' ? -1 : 1;
+  const tbody = document.querySelector('#bk-table tbody');
+  if (!tbody) return;
+  const rows = Array.from(tbody.querySelectorAll('tr')).filter(r => r.dataset.id);
+  if (!rows.length) return;
+  rows.sort((a, b) => {
+    let av, bv;
+    if (field === 'amount') {
+      av = parseFloat(a.dataset.amount) || 0;
+      bv = parseFloat(b.dataset.amount) || 0;
+      return (av - bv) * mult;
+    }
+    if (field === 'created') {
+      av = parseInt(a.dataset.id) || 0;
+      bv = parseInt(b.dataset.id) || 0;
+      return (av - bv) * mult;
+    }
+    av = a.dataset[field] || '';
+    bv = b.dataset[field] || '';
+    return av.localeCompare(bv) * mult;
+  });
+  rows.forEach(r => tbody.appendChild(r));
+  try { localStorage.setItem('bk-sort', sel.value); } catch (e) {}
+}
+document.addEventListener('DOMContentLoaded', () => {
+  const sel = document.getElementById('bk-sort');
+  if (sel) {
+    try { const v = localStorage.getItem('bk-sort'); if (v) sel.value = v; } catch (e) {}
+    sortBookings();
+  }
+});
 
 // ── Copy iCal URL ─────────────────────────────────────────────────
 function copyUrl(id, btn) {

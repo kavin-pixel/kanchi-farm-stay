@@ -833,17 +833,39 @@ input:checked + .slider:before { transform: translateX(18px); }
 }
 
 /* ── Floating Action Button (mobile) ─────────────────────────────── */
+.fab-stack {
+  position: fixed; bottom: 1.1rem; right: 1.1rem;
+  display: none; flex-direction: column; align-items: flex-end;
+  gap: .65rem; z-index: 80;
+}
 .fab {
-  position: fixed; bottom: 1.25rem; right: 1.25rem;
   width: 52px; height: 52px; border-radius: 50%;
   background: var(--accent); color: #fff; border: none;
-  display: none; align-items: center; justify-content: center;
-  font-size: 1.2rem; cursor: pointer; z-index: 80;
-  box-shadow: 0 4px 16px rgba(249,115,22,.4);
-  transition: transform var(--tr-fast), box-shadow var(--tr-fast);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.15rem; cursor: pointer;
+  box-shadow: 0 6px 18px rgba(249,115,22,.4);
+  transition: transform var(--tr-fast), box-shadow var(--tr-fast), background var(--tr-fast);
+  -webkit-tap-highlight-color: transparent;
 }
-.fab:hover { transform: scale(1.06); box-shadow: 0 6px 20px rgba(249,115,22,.5); }
-.fab:active { transform: scale(.96); }
+.fab:hover { transform: scale(1.06); box-shadow: 0 8px 22px rgba(249,115,22,.5); }
+.fab:active { transform: scale(.94); }
+
+.fab-secondary {
+  width: 46px; height: 46px;
+  background: var(--surface); color: var(--text-hi);
+  border: 1.5px solid var(--border-strong);
+  box-shadow: var(--shadow-md);
+}
+.fab-secondary:hover { background: var(--bg-hover); box-shadow: var(--shadow-lg); }
+
+/* Extended primary FAB with label */
+.fab-primary {
+  width: auto; min-width: 56px; height: 56px;
+  padding: 0 1.1rem 0 1rem; border-radius: 28px;
+  gap: .5rem; font-size: .9rem; font-weight: 700;
+  font-family: var(--font-heading); letter-spacing: .01em;
+}
+.fab-primary .fab-label { display: inline-block; white-space: nowrap; }
 
 /* ── Tooltip ─────────────────────────────────────────────────────── */
 #ui-tooltip {
@@ -884,17 +906,94 @@ input:checked + .slider:before { transform: translateX(18px); }
   .main { margin-left: 0 !important; }
   .layout.sidebar-collapsed .main { margin-left: 0 !important; }
 
-  .topbar { padding: 0 1rem; }
-  .content { padding: 1rem; }
+  .topbar { padding: 0 .85rem; }
+  .content { padding: 1rem .85rem 5.5rem; }
   .stats-row { grid-template-columns: 1fr 1fr; }
   .kpi-strip  { grid-template-columns: 1fr 1fr; }
-  .drawer { width: 100vw; }
-  .fab { display: flex; }
+  .fab-stack { display: flex; }
   .tbl .hide-mobile { display: none; }
   .gantt-day-col { min-width: 40px; width: 40px; }
   .gantt-room-col { width: 120px; min-width: 120px; }
   .gantt-scroll-hint { display: block; }
   .topbar-date { display: none; }
+
+  /* ── Search bar full-width stacking ──────────── */
+  .search-bar { padding: .75rem .9rem; gap: .5rem; }
+  .search-bar input,
+  .search-bar select { flex: 1 1 calc(50% - .3rem); min-width: 0; font-size: .85rem; padding: .55rem .7rem; }
+  .search-bar > div:first-child { flex: 1 1 100%; }
+  .search-bar > div:first-child input { width: 100%; min-width: 0; }
+  #bk-result-count { flex-basis: 100%; text-align: right; margin-left: 0 !important; margin-top: .25rem; }
+
+  /* ── Bookings: table → card stack on mobile ──── */
+  .tbl-wrap.bookings-cards { overflow: visible; padding: .85rem; }
+  .bookings-cards table.tbl,
+  .bookings-cards table.tbl tbody,
+  .bookings-cards table.tbl tr { display: block; width: 100%; }
+  .bookings-cards table.tbl thead { display: none; }
+  .bookings-cards table.tbl tr {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-sm);
+    padding: .85rem 1rem .65rem;
+    margin-bottom: .7rem;
+    position: relative;
+  }
+  .bookings-cards table.tbl tr.row-empty { background: transparent; border: none; box-shadow: none; padding: 2rem 1rem; text-align: center; }
+  .bookings-cards table.tbl td {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: .32rem 0 !important; border: none !important;
+    font-size: .85rem; gap: .65rem;
+  }
+  .bookings-cards table.tbl td::before {
+    content: attr(data-label);
+    font-size: .68rem; font-weight: 700; letter-spacing: .05em;
+    text-transform: uppercase; color: var(--text-xlo);
+    flex: 0 0 auto; min-width: 5.5rem;
+  }
+  .bookings-cards table.tbl td.cell-property {
+    display: block; padding-bottom: .55rem !important;
+    margin-bottom: .35rem; border-bottom: 1px solid var(--border) !important;
+    font-size: .92rem; font-weight: 700; color: var(--text-hi);
+  }
+  .bookings-cards table.tbl td.cell-property::before { display: none; }
+  .bookings-cards table.tbl td.cell-actions {
+    margin-top: .55rem; padding-top: .55rem !important;
+    border-top: 1px solid var(--border) !important;
+    justify-content: flex-end; gap: .4rem;
+  }
+  .bookings-cards table.tbl td.cell-actions::before { display: none; }
+  .bookings-cards table.tbl td.cell-actions .btn { padding: .45rem .7rem; font-size: .85rem; }
+  .bookings-cards table.tbl td .muted { font-size: .75rem; }
+
+  /* ── Drawer: bottom sheet ─────────────────────── */
+  .drawer {
+    width: 100vw; max-width: 100vw;
+    top: auto; right: 0; left: 0; bottom: 0;
+    height: 92vh; max-height: 92vh;
+    border-radius: var(--r-xl) var(--r-xl) 0 0;
+    transform: translateY(110%);
+  }
+  .drawer.open { transform: translateY(0); }
+  .drawer-head { padding: 1rem 1.1rem .85rem; position: relative; }
+  .drawer-head::before {
+    content: ''; position: absolute; top: .45rem; left: 50%;
+    transform: translateX(-50%); width: 42px; height: 4px;
+    background: var(--border-strong); border-radius: 2px;
+  }
+  .drawer-body { padding: 1rem 1.1rem 1.5rem; gap: 1rem; }
+  .drawer-foot { padding: .85rem 1.1rem calc(.85rem + env(safe-area-inset-bottom)); }
+  .drawer-foot .btn { padding: .85rem; font-size: .92rem; }
+  .drawer-body .fld input,
+  .drawer-body .fld select,
+  .drawer-body .fld textarea { padding: .72rem .85rem; font-size: 1rem; min-height: 42px; }
+  /* Stack 2-col grids inside drawer */
+  .drawer-body div[style*="grid-template-columns:1fr 1fr"],
+  .drawer-body div[style*="grid-template-columns: 1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+  .bk-type-btn { padding: .7rem .9rem; font-size: .88rem; }
 }
 
 @media (max-width: 480px) {
@@ -907,7 +1006,7 @@ input:checked + .slider:before { transform: translateX(18px); }
 .row-selected td { background: #FFF7ED !important; }
 .chart-wrap { overflow-x: auto; }
 @media print {
-  .sidebar, .topbar, .drawer-overlay, .drawer, .fab, .kb-modal-overlay { display: none !important; }
+  .sidebar, .topbar, .drawer-overlay, .drawer, .fab-stack, .kb-modal-overlay { display: none !important; }
   .main { margin-left: 0 !important; }
   .content { padding: 0 !important; }
 }

@@ -26,8 +26,32 @@ if (!$roomId || !isset($rooms[$roomId])) {
     exit;
 }
 
-$ranges  = getBlockedRanges($roomId);
-$blocked = array_map(fn($r) => [$r['check_in'], $r['check_out']], $ranges);
+// White Villa mutual-block: Room 1, Room 2, and Full Floor are mutually exclusive.
+// Booking any one blocks the others.
+$whiteVillaLinks = [
+    'white-villa'            => ['white-villa-full-floor'],
+    'white-villa-room-2'     => ['white-villa-full-floor'],
+    'white-villa-full-floor' => ['white-villa', 'white-villa-room-2'],
+];
+
+$linkedRooms = $whiteVillaLinks[$roomId] ?? [];
+
+$allRanges = getBlockedRanges($roomId);
+foreach ($linkedRooms as $linked) {
+    $allRanges = array_merge($allRanges, getBlockedRanges($linked));
+}
+
+// Deduplicate by check_in+check_out
+$seen    = [];
+$blocked = [];
+foreach ($allRanges as $r) {
+    $key = $r['check_in'] . '|' . $r['check_out'];
+    if (!isset($seen[$key])) {
+        $seen[$key] = true;
+        $blocked[]  = [$r['check_in'], $r['check_out']];
+    }
+}
+usort($blocked, fn($a, $b) => strcmp($a[0], $b[0]));
 
 $response = ['room' => $roomId, 'blocked' => $blocked];
 

@@ -54,6 +54,26 @@ if ($id === false) {
     exit;
 }
 
+// White Villa mutual-block: booking one unit creates shadow blocks on the others.
+$whiteVillaLinks = [
+    'white-villa'            => ['white-villa-full-floor'],
+    'white-villa-room-2'     => ['white-villa-full-floor'],
+    'white-villa-full-floor' => ['white-villa', 'white-villa-room-2'],
+];
+
+if (isset($whiteVillaLinks[$booking['room_id']])) {
+    foreach ($whiteVillaLinks[$booking['room_id']] as $linkedRoomId) {
+        $shadow = $booking;
+        $shadow['room_id']   = $linkedRoomId;
+        $shadow['room_name'] = ROOM_IDS[$linkedRoomId] ?? $linkedRoomId;
+        $shadow['uid']       = 'shadow-' . $id . '-' . $linkedRoomId . '@kanchifarmstay.com';
+        $shadow['notes']     = 'Auto-blocked: linked to booking #' . $id . ' (' . $booking['room_name'] . ')';
+        $shadow['amount']    = 0;
+        $shadow['amount_paid'] = 0;
+        addBooking($shadow);
+    }
+}
+
 // Mark the booking attempt as converted (stops abandonment recovery)
 markAttemptConverted($input['orderId'] ?? '');
 

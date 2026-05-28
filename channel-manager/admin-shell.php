@@ -33,7 +33,6 @@ if (!empty($_SESSION['admin_logged_in']) && ($_POST['action'] ?? '') === 'switch
 
 // ── Output helpers ────────────────────────────────────────────────
 function renderAdminHead(string $title = 'Admin'): void {
-    $base = defined('SITE_URL') ? rtrim(SITE_URL, '/') : '';
     ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -41,10 +40,10 @@ function renderAdminHead(string $title = 'Admin'): void {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title><?= htmlspecialchars($title) ?> — Kanchi Farm Stay PMS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="admin-styles.css">
-<style>
-/* page-level overrides can go here */
-</style>
 </head>
 <body>
     <?php
@@ -55,34 +54,52 @@ function renderSidebar(string $activeSection = ''): void {
     $propName = $prop['name'] ?? 'Kanchi Farm Stay';
     $allProps = getAllProperties();
 
-    $navItems = [
-        'dashboard'   => ['📊', 'Dashboard',      'admin.php'],
-        'calendar'    => ['📅', 'Calendar',        'admin.php?section=calendar'],
-        'bookings'    => ['📋', 'Bookings',        'admin.php?section=bookings'],
-        'guests'      => ['👤', 'Guests',          'admin-guests.php'],
-        'channels'    => ['🔗', 'Channels',        'admin-channels.php'],
-        'pricing'     => ['💡', 'AI Pricing',      'admin-pricing.php'],
-        'campaigns'   => ['🎟️',  'Campaigns',       'admin-campaigns.php'],
-        'whatsapp'    => ['💬', 'WhatsApp',        'admin-whatsapp.php'],
-        'revenue'     => ['📈', 'Revenue',         'admin-revenue.php'],
-        'reputation'  => ['⭐', 'Reputation',      'admin-reputation.php'],
-        'agents'      => ['🤝', 'Agents & Corp.',  'admin-agents.php'],
-        'night-audit' => ['🌙', 'Night Audit',     'admin-night-audit.php'],
-        'logs'        => ['📜', 'Logs',            'admin-logs.php'],
-        'settings'    => ['⚙️',  'Settings',        'admin-settings.php'],
+    $navGroups = [
+        'Operations' => [
+            'dashboard'   => ['📊', 'Dashboard',     'admin.php'],
+            'calendar'    => ['📅', 'Calendar',       'admin.php?section=calendar'],
+            'bookings'    => ['📋', 'Bookings',       'admin.php?section=bookings'],
+            'guests'      => ['👤', 'Guests',         'admin-guests.php'],
+            'night-audit' => ['🌙', 'Night Audit',    'admin-night-audit.php'],
+        ],
+        'Revenue' => [
+            'channels'    => ['🔗', 'Channels',       'admin-channels.php'],
+            'pricing'     => ['💡', 'AI Pricing',     'admin-pricing.php'],
+            'campaigns'   => ['🎟️', 'Campaigns',      'admin-campaigns.php'],
+            'revenue'     => ['📈', 'Revenue',        'admin-revenue.php'],
+            'agents'      => ['🤝', 'Agents & Corp.', 'admin-agents.php'],
+        ],
+        'Engagement' => [
+            'whatsapp'    => ['💬', 'WhatsApp',       'admin-whatsapp.php'],
+            'reputation'  => ['⭐', 'Reputation',     'admin-reputation.php'],
+        ],
+        'System' => [
+            'logs'        => ['📜', 'Logs',           'admin-logs.php'],
+            'settings'    => ['⚙️', 'Settings',       'admin-settings.php'],
+        ],
     ];
     ?>
 <aside class="sidebar">
   <div class="sidebar-brand">
-    <div class="name"><?= htmlspecialchars($propName) ?></div>
-    <div class="sub">Property Management</div>
+    <div class="brand-row">
+      <div class="brand-icon">🌿</div>
+      <div>
+        <div class="name"><?= htmlspecialchars($propName) ?></div>
+        <div class="sub">PMS Dashboard</div>
+      </div>
+    </div>
   </div>
+
   <nav class="sidebar-nav">
-    <?php foreach ($navItems as $key => [$icon, $label, $href]): ?>
-      <a href="<?= $href ?>" class="nav-item <?= $activeSection === $key ? 'active' : '' ?>">
-        <span class="nav-icon"><?= $icon ?></span>
-        <?= $label ?>
-      </a>
+    <?php foreach ($navGroups as $groupLabel => $navItems): ?>
+      <div class="sidebar-section-label"><?= $groupLabel ?></div>
+      <?php foreach ($navItems as $key => [$icon, $label, $href]): ?>
+        <a href="<?= $href ?>" class="nav-item <?= $activeSection === $key ? 'active' : '' ?>">
+          <span class="nav-icon"><?= $icon ?></span>
+          <?= $label ?>
+        </a>
+      <?php endforeach; ?>
+      <div class="sidebar-divider"></div>
     <?php endforeach; ?>
   </nav>
 
@@ -103,8 +120,8 @@ function renderSidebar(string $activeSection = ''): void {
   <?php endif; ?>
 
   <div class="sidebar-bottom">
-    <a href="/">← View website</a>
-    <a href="admin.php?action=logout" style="margin-top:.4rem;display:block;color:#e57373;">Sign out</a>
+    <a href="/">↗ View website</a>
+    <a href="admin.php?action=logout" class="signout">Sign out</a>
   </div>
 </aside>
     <?php
@@ -114,9 +131,11 @@ function renderTopbar(string $pageTitle = '', string $extra = ''): void {
     ?>
 <div class="main">
   <div class="topbar">
-    <div class="topbar-title"><?= htmlspecialchars($pageTitle) ?></div>
+    <div class="topbar-left">
+      <div class="topbar-title"><?= htmlspecialchars($pageTitle) ?></div>
+    </div>
     <div class="topbar-right">
-      <span><?= date('D, d M Y') ?></span>
+      <span class="topbar-date"><?= date('D, d M Y') ?></span>
       <?= $extra ?>
     </div>
   </div>

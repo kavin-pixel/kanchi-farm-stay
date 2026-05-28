@@ -1,0 +1,129 @@
+{
+  "theme_and_archetype": {
+    "theme": "Light",
+    "archetype": "Archetype 4 (Swiss & High-Contrast)",
+    "description": "Functional, clean, high-contrast B2B SaaS dashboard tailored for pure HTML/CSS/PHP. Emphasizes clarity for dense data (Gantt charts, tables) over decoration. Minimalist look with distinct structural lines."
+  },
+  "typography": {
+    "headings": "Outfit, sans-serif",
+    "body": "Manrope, sans-serif",
+    "implementation_notes": "Import via Google Fonts. Use semantic tags (h1-h6).",
+    "css_variables": {
+      "--font-heading": "'Outfit', sans-serif",
+      "--font-body": "'Manrope', sans-serif",
+      "--text-xs": "0.75rem",
+      "--text-sm": "0.875rem",
+      "--text-base": "1rem",
+      "--text-lg": "1.125rem",
+      "--text-xl": "1.25rem",
+      "--text-2xl": "1.5rem"
+    }
+  },
+  "colors": {
+    "description": "High-contrast structural grayscale with sharp actionable accents.",
+    "css_variables": {
+      "--bg-root": "#F8FAFC",
+      "--bg-surface": "#FFFFFF",
+      "--bg-surface-hover": "#F1F5F9",
+      "--text-primary": "#0F172A",
+      "--text-secondary": "#64748B",
+      "--text-muted": "#94A3B8",
+      "--border-light": "#E2E8F0",
+      "--border-strong": "#CBD5E1",
+      "--accent-primary": "#0F172A",
+      "--accent-primary-hover": "#334155",
+      "--accent-success": "#10B981",
+      "--accent-warning": "#F59E0B",
+      "--accent-danger": "#EF4444",
+      "--accent-info": "#3B82F6",
+      "--bg-booking-confirmed": "#DBEAFE",
+      "--text-booking-confirmed": "#1D4ED8",
+      "--bg-booking-pending": "#FEF3C7",
+      "--text-booking-pending": "#B45309"
+    }
+  },
+  "layout_and_spacing": {
+    "description": "Use CSS variables for consistent padding and gaps. Emphasize whitespace even in dense data views.",
+    "css_variables": {
+      "--space-1": "0.25rem",
+      "--space-2": "0.5rem",
+      "--space-3": "0.75rem",
+      "--space-4": "1rem",
+      "--space-6": "1.5rem",
+      "--space-8": "2rem",
+      "--sidebar-width": "260px",
+      "--sidebar-collapsed-width": "80px"
+    },
+    "general_rules": [
+      "Sidebar: Fixed width, transition width on collapse using purely JS toggling a class.",
+      "Main Content: Margin-left equal to sidebar width, smooth transition.",
+      "Dashboard Bento Grid: Use CSS Grid with gap-6, auto-fit or specific column spans for KPIs."
+    ]
+  },
+  "components": {
+    "buttons": {
+      "classes": ".btn, .btn-primary, .btn-outline, .btn-icon",
+      "rules": "Border-radius 6px. Padding 8px 16px. Font-weight 500. Transition background and transform on hover. Primary button is dark slate (--accent-primary)."
+    },
+    "cards": {
+      "classes": ".card",
+      "rules": "Background white, 1px solid --border-light, border-radius 8px, padding 24px. No heavy drop shadows; use structural borders instead."
+    },
+    "gantt_calendar": {
+      "classes": ".gantt-wrapper, .gantt-header, .gantt-row, .gantt-cell, .booking-bar",
+      "rules": [
+        "Layout: Use a CSS Grid or Table with sticky first column (Rooms) and sticky top row (Dates).",
+        "Cell Sizing: Minimum width 60px per day, height 50px for generous click targets.",
+        "Booking Bars: Positioned absolutely inside cells, spanning multiple days using width calculations. Border-radius 4px, padding 4px 8px, distinct background colors based on status.",
+        "Hover state: Slight brightness increase on booking bars, show a CSS tooltip or JS-driven popover."
+      ]
+    },
+    "data_tables": {
+      "classes": ".table-wrapper, .table, .badge",
+      "rules": [
+        "Wrapper: overflow-x: auto, border 1px solid --border-light, border-radius 8px.",
+        "Table: width 100%, border-collapse collapse.",
+        "Th/Td: Padding 12px 16px, text-align left, border-bottom 1px solid --border-light.",
+        "Headers (Th): Sticky top, background white, font-weight 600, font-size 0.75rem, text-transform uppercase, color --text-secondary.",
+        "Badges: For statuses. Inline-flex, padding 2px 8px, border-radius 999px, font-size 0.75rem."
+      ]
+    },
+    "slide_over_drawer": {
+      "classes": ".drawer-overlay, .drawer-panel",
+      "rules": [
+        "Overlay: Fixed inset-0, bg-black/50, backdrop-blur-sm, z-40, display none by default.",
+        "Panel: Fixed top-0, right-0, bottom-0, width 400px, background white, z-50, transform translateX(100%), transition transform 0.3s ease.",
+        "Forms inside drawer: Clean layout, group inputs with labels, generous spacing (--space-4) between form groups."
+      ]
+    }
+  },
+  "icons": {
+    "library": "FontAwesome (CDN)",
+    "rules": "Replace all emojis. Use consistent weight (e.g., solid or regular). Example: 'fa-solid fa-calendar', 'fa-solid fa-bars', 'fa-solid fa-user'."
+  },
+  "testing": {
+    "rules": "All interactive and key informational elements MUST include a `data-testid` attribute in the HTML. Example: `data-testid='dashboard-kpi-revenue'`, `data-testid='booking-row-1234'`, `data-testid='btn-sync-channels'`."
+  },
+  "media_urls": {
+    "hotel_interior": {
+      "url": "https://images.pexels.com/photos/33803745/pexels-photo-33803745.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+      "description": "Elegant corridor of a heritage hotel, showcasing architectural charm and luxury design.",
+      "category": "dashboard_hero_or_property_image"
+    },
+    "guest_avatars": [
+      {
+        "url": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Njl8MHwxfHNlYXJjaHwzfHxwcm9mZXNzaW9uYWwlMjBoZWFkc2hvdCUyMHBvcnRyYWl0fGVufDB8fHx8MTc3OTk2OTE5Nnww&ixlib=rb-4.1.0&q=85",
+        "description": "Woman smiling"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Njl8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjBoZWFkc2hvdCUyMHBvcnRyYWl0fGVufDB8fHx8MTc3OTk2OTE5Nnww&ixlib=rb-4.1.0&q=85",
+        "description": "Man portrait"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1607503873903-c5e95f80d7b9?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Njl8MHwxfHNlYXJjaHw0fHxwcm9mZXNzaW9uYWwlMjBoZWFkc2hvdCUyMHBvcnRyYWl0fGVufDB8fHx8MTc3OTk2OTE5Nnww&ixlib=rb-4.1.0&q=85",
+        "description": "Woman in black crew neck shirt"
+      }
+    ]
+  },
+  "instructions_to_main_agent": "This is a pure vanilla HTML/CSS/JS project (PHP backend). DO NOT use React, Tailwind, or Shadcn. Implement these design tokens via pure CSS variables in the existing admin-styles.css file. Use pure vanilla JavaScript (.js files) for the collapsible sidebar, slide-over drawer toggling, and Gantt scrolling. Include FontAwesome CDN in the HTML head. All interactive elements MUST have data-testid attributes."
+}

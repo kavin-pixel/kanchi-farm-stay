@@ -141,6 +141,13 @@ if (!empty($_SESSION['admin_logged_in'])) {
 
     $departures = array_filter($upcoming, fn($b) => $b['check_out'] <= $nextWeek && $b['check_out'] >= date('Y-m-d'));
 
+    $today          = date('Y-m-d');
+    $todayArrivals  = array_values(array_filter($confirmed, fn($b) => $b['check_in']  === $today));
+    $todayDepartures = array_values(array_filter($confirmed, fn($b) => $b['check_out'] === $today));
+    $inHouse        = array_values(array_filter($confirmed, fn($b) => $b['check_in'] <= $today && $b['check_out'] > $today));
+    usort($todayArrivals,   fn($a,$b) => strcmp($a['room_name'], $b['room_name']));
+    usort($todayDepartures, fn($a,$b) => strcmp($a['room_name'], $b['room_name']));
+
     $ganttDays   = 60;
     $ganttOffset = (int)($_GET['gantt_offset'] ?? 0);
     // Clamp to a reasonable range so query doesn't get silly
@@ -344,7 +351,17 @@ function bookingOnDay(array $bookings, string $date): ?array {
       <button class="topbar-hamburger" id="sidebar-hamburger" data-testid="btn-hamburger">
         <i class="fa-solid fa-bars"></i>
       </button>
-      <div class="topbar-title" id="topbar-title">Dashboard</div>
+<?php
+$sectionTitles = [
+  'dashboard' => 'Dashboard',
+  'calendar'  => 'Availability Calendar',
+  'bookings'  => 'Bookings',
+  'channels'  => 'Channels',
+  'export'    => 'iCal Export',
+];
+$initialTitle = $sectionTitles[$section] ?? 'Dashboard';
+?>
+      <div class="topbar-title" id="topbar-title"><?= htmlspecialchars($initialTitle) ?></div>
     </div>
     <div class="topbar-right">
       <span class="topbar-date"><i class="fa-regular fa-calendar" style="margin-right:.3rem;"></i><?= date('D, d M Y') ?></span>
@@ -364,6 +381,67 @@ function bookingOnDay(array $bookings, string $date): ?array {
 
     <!-- ════════════ DASHBOARD ════════════ -->
     <div id="sec-dashboard" class="section-pane <?= $section==='dashboard'?'active':'' ?>">
+
+      <!-- Today's Daily Ops widget -->
+      <div class="today-widget" data-testid="today-widget">
+        <div class="today-widget-head">
+          <div>
+            <div class="today-widget-eyebrow">Today · <?= date('D, d M') ?></div>
+            <h3 class="today-widget-title">Daily Ops Snapshot</h3>
+          </div>
+          <div class="today-widget-counts">
+            <span class="tw-pill tw-pill-arrival" data-testid="today-arrivals-count"><i class="fa-solid fa-plane-arrival"></i> <?= count($todayArrivals) ?> arriving</span>
+            <span class="tw-pill tw-pill-departure" data-testid="today-departures-count"><i class="fa-solid fa-plane-departure"></i> <?= count($todayDepartures) ?> leaving</span>
+            <span class="tw-pill tw-pill-inhouse" data-testid="today-inhouse-count"><i class="fa-solid fa-bed"></i> <?= count($inHouse) ?> in-house</span>
+          </div>
+        </div>
+        <div class="today-widget-grid">
+          <!-- Arrivals column -->
+          <div class="tw-col">
+            <div class="tw-col-head"><i class="fa-solid fa-plane-arrival" style="color:var(--success);"></i> Check-ins</div>
+            <?php if (empty($todayArrivals)): ?>
+              <div class="tw-empty">No arrivals today.</div>
+            <?php else: foreach ($todayArrivals as $b): ?>
+              <div class="tw-item" data-testid="today-arrival-<?= $b['id'] ?>">
+                <button type="button" class="tw-item-btn" onclick="editBooking(<?= (int)$b['id'] ?>)">
+                  <div class="tw-item-main">
+                    <div class="tw-item-name"><?= htmlspecialchars($b['guest_name']) ?></div>
+                    <div class="tw-item-sub"><?= htmlspecialchars($b['room_name']) ?> · <?= nights($b['check_in'],$b['check_out']) ?>n · <?= htmlspecialchars(sourceName($b['source'])) ?></div>
+                  </div>
+                  <div class="tw-item-actions">
+                    <?php if ($b['guest_phone']): ?>
+                      <a href="tel:<?= htmlspecialchars($b['guest_phone']) ?>" class="tw-act" onclick="event.stopPropagation()" data-tip="Call" data-testid="tw-call-<?= $b['id'] ?>"><i class="fa-solid fa-phone"></i></a>
+                      <a href="https://wa.me/<?= preg_replace('/\D/','',$b['guest_phone']) ?>" target="_blank" class="tw-act tw-act-wa" onclick="event.stopPropagation()" data-tip="WhatsApp" data-testid="tw-wa-<?= $b['id'] ?>"><i class="fa-brands fa-whatsapp"></i></a>
+                    <?php endif; ?>
+                  </div>
+                </button>
+              </div>
+            <?php endforeach; endif; ?>
+          </div>
+          <!-- Departures column -->
+          <div class="tw-col">
+            <div class="tw-col-head"><i class="fa-solid fa-plane-departure" style="color:var(--accent);"></i> Check-outs</div>
+            <?php if (empty($todayDepartures)): ?>
+              <div class="tw-empty">No departures today.</div>
+            <?php else: foreach ($todayDepartures as $b): ?>
+              <div class="tw-item" data-testid="today-departure-<?= $b['id'] ?>">
+                <button type="button" class="tw-item-btn" onclick="editBooking(<?= (int)$b['id'] ?>)">
+                  <div class="tw-item-main">
+                    <div class="tw-item-name"><?= htmlspecialchars($b['guest_name']) ?></div>
+                    <div class="tw-item-sub"><?= htmlspecialchars($b['room_name']) ?> · <?= htmlspecialchars(sourceName($b['source'])) ?></div>
+                  </div>
+                  <div class="tw-item-actions">
+                    <?php if ($b['guest_phone']): ?>
+                      <a href="tel:<?= htmlspecialchars($b['guest_phone']) ?>" class="tw-act" onclick="event.stopPropagation()" data-tip="Call" data-testid="tw-call-<?= $b['id'] ?>"><i class="fa-solid fa-phone"></i></a>
+                      <a href="https://wa.me/<?= preg_replace('/\D/','',$b['guest_phone']) ?>" target="_blank" class="tw-act tw-act-wa" onclick="event.stopPropagation()" data-tip="WhatsApp" data-testid="tw-wa-out-<?= $b['id'] ?>"><i class="fa-brands fa-whatsapp"></i></a>
+                    <?php endif; ?>
+                  </div>
+                </button>
+              </div>
+            <?php endforeach; endif; ?>
+          </div>
+        </div>
+      </div>
 
       <!-- KPI Cards -->
       <div class="stats-row">

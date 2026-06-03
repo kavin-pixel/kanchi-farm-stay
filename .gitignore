@@ -46,3 +46,10 @@ channel-manager/sync.log
 *.MP4
 *.mp4
 assets/videos/
+.env
+.env.*
+*.env
+credentials.json
+*.pem
+*.key
+.credentials

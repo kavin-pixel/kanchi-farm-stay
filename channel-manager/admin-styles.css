@@ -102,16 +102,18 @@ h1, h2, h3, h4, h5, h6 { font-family: var(--font-heading); color: var(--text-hi)
 .login-page {
   min-height: 100vh;
   display: flex; align-items: center; justify-content: center;
-  background: #0F172A;
+  background: var(--bg);
   background-image:
-    radial-gradient(ellipse at 20% 50%, rgba(249,115,22,.1) 0%, transparent 60%),
-    radial-gradient(ellipse at 80% 20%, rgba(37,99,235,.07) 0%, transparent 55%);
+    radial-gradient(ellipse at 25% 15%, rgba(249,115,22,.10) 0%, transparent 55%),
+    radial-gradient(ellipse at 80% 85%, rgba(37,99,235,.05) 0%, transparent 55%);
+  padding: 1.25rem;
 }
 .login-card {
   background: var(--surface); border-radius: var(--r-xl);
   padding: 2.5rem 2.25rem;
   width: 380px; max-width: calc(100vw - 2rem);
   box-shadow: var(--shadow-xl);
+  border: 1px solid var(--border);
 }
 .login-logo { text-align: center; margin-bottom: 2rem; }
 .login-logo .icon {
@@ -1026,12 +1028,74 @@ input:checked + .slider:before { transform: translateX(18px); }
     grid-template-columns: 1fr !important;
   }
   .bk-type-btn { padding: .7rem .9rem; font-size: .88rem; }
+
+  /* ── Topbar: compact, icon-first ─────────────── */
+  .topbar { gap: .5rem; }
+  .topbar-title { font-size: .92rem; }
+  .topbar-right { gap: .35rem; }
+  .topbar-right .btn-icon[data-testid="btn-shortcuts"] { display: none; }
+  .sync-btn { padding: .42rem .55rem !important; font-size: 0 !important; min-width: 36px; min-height: 36px; }
+  .sync-btn i { font-size: .85rem; margin: 0 !important; }
+  .sync-btn::after { content: none !important; }
+
+  /* Robust mobile horizontal-overflow clipping */
+  body { overflow-x: hidden; }
+  .layout, .main, .content { max-width: 100vw; min-width: 0; }
+  .main { overflow-x: hidden; }
+  .panel { max-width: 100%; }
+  .tbl-wrap { max-width: 100%; }
+
+  /* ── Stat cards: compact ───────────────────── */
+  .stat-card { padding: .85rem .9rem; }
+  .stat-card .stat-icon { width: 30px; height: 30px; font-size: .78rem; margin-bottom: .45rem; }
+  .stat-card .stat-val, .stat-card .stat-value { font-size: 1.4rem; word-break: break-word; }
+  .stat-card .stat-lbl, .stat-card .stat-label { font-size: .68rem; line-height: 1.3; }
+
+  /* Panel header compaction */
+  .panel-hd { padding: .85rem 1rem; }
+  .panel-bd { padding: .85rem 1rem; }
+  .panel-hd h3, .card-header h2, .card-header h3 { font-size: .88rem; }
+
+  /* Recent / arrivals lists scroll horizontally */
+  .panel-bd .tbl-wrap, .panel-bd .table-wrapper { overflow-x: auto; }
+
+  /* ── Calendar toolbar: compact, icon-first ──── */
+  .cal-toolbar { gap: .35rem; }
+  .cal-toolbar h3 { font-size: .9rem; flex-basis: 100%; margin-bottom: .15rem; }
+  .cal-nav-btn { padding: .35rem .6rem; font-size: .75rem; }
+  /* Hide labels (text after icon) on Prev / Next via attribute selector */
+  [data-testid="btn-cal-prev"] { font-size: 0; padding: .42rem .65rem; }
+  [data-testid="btn-cal-prev"] i { font-size: .8rem !important; }
+  [data-testid="btn-cal-next"] { font-size: 0; padding: .42rem .65rem; }
+  [data-testid="btn-cal-next"] i { font-size: .8rem !important; }
+  /* Hide "30 days/60 days" text - keep icons */
+  #cal-btn-30, #cal-btn-60 { font-size: 0; padding: .42rem .55rem; }
+  #cal-btn-30 i, #cal-btn-60 i { font-size: .8rem !important; }
+  .cal-range-label { font-size: .7rem; padding: .25rem .55rem; flex-basis: 100%; text-align: center; margin: .2rem 0; }
+  .cal-add-btn { padding: .42rem .7rem; font-size: .78rem; }
+
+  /* ── Bookings filters: tighter ─────────────── */
+  .date-range-bar { gap: .4rem; }
+  .date-range-bar .dr-lbl { font-size: .68rem; margin-bottom: .1rem; }
+  .dr-presets .cal-nav-sm { padding: .28rem .55rem !important; font-size: .7rem !important; }
+
+  /* Stats row: 2-col already; ensure narrow padding */
+  .content { padding: .8rem .75rem 5.5rem; }
+
+  /* Reduce mobile padding inside dash cards */
+  .dash-grid { gap: .85rem; }
+
+  /* Make any wide tables horizontally scrollable on mobile */
+  .tbl-wrap:not(.bookings-cards) { overflow-x: auto; }
+  .tbl-wrap:not(.bookings-cards) table { min-width: 600px; }
 }
 
 @media (max-width: 480px) {
   .stats-row  { grid-template-columns: 1fr 1fr; }
   .kpi-strip  { grid-template-columns: 1fr 1fr; }
   .form-grid.cols-2, .form-grid.cols-3 { grid-template-columns: 1fr; }
+  .stat-card { padding: .75rem .8rem; }
+  .stat-card .stat-val, .stat-card .stat-value { font-size: 1.2rem; }
 }
 
 /* ── Misc ─────────────────────────────────────────────────────────── */

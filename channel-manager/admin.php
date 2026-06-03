@@ -53,6 +53,25 @@ if (!empty($_SESSION['admin_logged_in'])) {
     }
     if ($act === 'delete_booking')  { deleteBooking((int)$_POST['id']);  header('Location: admin.php?section=bookings&flash=Deleted');   exit; }
     if ($act === 'cancel_booking')  { cancelBooking((int)$_POST['id']);  header('Location: admin.php?section=bookings&flash=Cancelled'); exit; }
+    if ($act === 'update_booking') {
+        $bid = (int)($_POST['id'] ?? 0);
+        $rid = $_POST['room_id'] ?? '';
+        $data = [
+            'room_id'     => $rid,
+            'room_name'   => ROOM_IDS[$rid] ?? $rid,
+            'check_in'    => $_POST['check_in'],
+            'check_out'   => $_POST['check_out'],
+            'guest_name'  => trim($_POST['guest_name'] ?: 'Blocked'),
+            'guest_email' => trim($_POST['guest_email'] ?? ''),
+            'guest_phone' => trim($_POST['guest_phone'] ?? ''),
+            'source'      => $_POST['source'] ?? 'manual',
+            'amount'      => (float)($_POST['amount'] ?? 0),
+            'notes'       => trim($_POST['notes'] ?? ''),
+        ];
+        if ($bid) { updateBooking($bid, $data); }
+        $back = $_POST['return_to'] ?? 'bookings';
+        header('Location: admin.php?section=' . urlencode($back) . '&flash=Booking+updated'); exit;
+    }
     if ($act === 'add_calendar') {
         addExternalCalendar($_POST['room_id'], strtolower(trim($_POST['platform'])), trim($_POST['ical_url']), $propertyId, (float)($_POST['commission_pct'] ?? 0));
         header('Location: admin.php?section=channels&flash=Calendar+added'); exit;
@@ -122,14 +141,19 @@ if (!empty($_SESSION['admin_logged_in'])) {
 
     $departures = array_filter($upcoming, fn($b) => $b['check_out'] <= $nextWeek && $b['check_out'] >= date('Y-m-d'));
 
-    $ganttDays  = 60;
-    $ganttStart = new DateTime('today');
-    $ganttDates = [];
+    $ganttDays   = 60;
+    $ganttOffset = (int)($_GET['gantt_offset'] ?? 0);
+    // Clamp to a reasonable range so query doesn't get silly
+    $ganttOffset = max(-3650, min(3650, $ganttOffset));
+    $ganttStart  = new DateTime('today');
+    if ($ganttOffset !== 0) $ganttStart->modify(($ganttOffset >= 0 ? '+' : '') . $ganttOffset . ' days');
+    $ganttDates  = [];
     for ($i = 0; $i < $ganttDays; $i++) {
         $d = clone $ganttStart;
         $d->modify("+{$i} days");
         $ganttDates[] = $d->format('Y-m-d');
     }
+    // For Gantt past-date browsing: fetch ALL bookings (not just upcoming) so old rows still paint
     $bookingsByRoom = [];
     foreach ($rooms as $rid => $_) $bookingsByRoom[$rid] = [];
     foreach ($confirmed as $b) {
@@ -507,14 +531,27 @@ function bookingOnDay(array $bookings, string $date): ?array {
         <div class="panel-hd" style="flex-wrap:wrap;gap:.75rem;">
           <div class="cal-toolbar" style="margin:0;flex:1;">
             <h3>Availability Calendar</h3>
+            <?php
+              $prevOff = $ganttOffset - 30;
+              $nextOff = $ganttOffset + 30;
+              $rangeStart = date('d M Y', strtotime($ganttDates[0] ?? 'today'));
+              $rangeEnd   = date('d M Y', strtotime(end($ganttDates) ?: 'today'));
+            ?>
+            <button class="cal-nav-btn" onclick="ganttShift(<?= $prevOff ?>)" data-tip="Previous 30 days" data-testid="btn-cal-prev">
+              <i class="fa-solid fa-chevron-left" style="font-size:.72rem;"></i> Prev
+            </button>
+            <button class="cal-nav-btn" onclick="ganttShift(0)" data-tip="Jump to today" data-testid="btn-cal-jump-today">
+              <i class="fa-solid fa-crosshairs" style="font-size:.72rem;"></i> Today
+            </button>
+            <button class="cal-nav-btn" onclick="ganttShift(<?= $nextOff ?>)" data-tip="Next 30 days" data-testid="btn-cal-next">
+              Next <i class="fa-solid fa-chevron-right" style="font-size:.72rem;"></i>
+            </button>
+            <span class="cal-range-label" data-testid="cal-range-label"><?= $rangeStart ?> → <?= $rangeEnd ?></span>
             <button class="cal-nav-btn active" id="cal-btn-30" onclick="setCalRange(30)" data-testid="btn-cal-30">
               <i class="fa-solid fa-calendar" style="font-size:.72rem;"></i> 30 days
             </button>
             <button class="cal-nav-btn" id="cal-btn-60" onclick="setCalRange(60)" data-testid="btn-cal-60">
               <i class="fa-solid fa-calendar-week" style="font-size:.72rem;"></i> 60 days
-            </button>
-            <button class="cal-nav-btn" onclick="scrollToToday()" data-testid="btn-today">
-              <i class="fa-solid fa-crosshairs" style="font-size:.72rem;"></i> Today
             </button>
           </div>
           <button class="cal-add-btn" onclick="openDrawer()" data-testid="btn-add-booking-calendar">
@@ -621,9 +658,10 @@ function bookingOnDay(array $bookings, string $date): ?array {
                       $tipText  = $bk['guest_name'] . "\n" . sourceName($bk['source']) . " · " . $bk['check_in'] . " → " . $bk['check_out'] . " (" . $nightCnt . "n)";
                       if ($bk['amount'] > 0) $tipText .= "\n₹" . number_format($bk['amount']);
                   ?>
-                      <td colspan="<?= $span ?>" class="gantt-booking"
+                      <td colspan="<?= $span ?>" class="gantt-booking gantt-booking-clickable"
                           style="<?= $isMonthStart?'border-left:2px solid var(--border-strong);':'' ?>"
-                          data-tip="<?= htmlspecialchars($tipText) ?>"
+                          data-tip="<?= htmlspecialchars($tipText) ?> · click to edit"
+                          onclick="editBooking(<?= (int)$bk['id'] ?>)"
                           data-testid="gantt-booking-<?= $bk['id'] ?>">
                         <?php if ($isFirst): ?>
                           <div class="gantt-bk-inner <?= $isBlock?'is-block':'' ?>"
@@ -726,6 +764,31 @@ function bookingOnDay(array $bookings, string $date): ?array {
           <span id="bk-result-count" style="font-size:.77rem;color:var(--text-xlo);margin-left:auto;"></span>
         </div>
 
+        <!-- Date-range filter row -->
+        <div class="search-bar date-range-bar" style="border-top:1px dashed var(--border);">
+          <span class="dr-lbl"><i class="fa-regular fa-calendar" style="margin-right:.3rem;color:var(--accent);"></i>Date range</span>
+          <div class="fld dr-fld">
+            <label for="bk-date-from">From</label>
+            <input type="date" id="bk-date-from" oninput="filterBookings()" data-testid="input-date-from">
+          </div>
+          <div class="fld dr-fld">
+            <label for="bk-date-to">To</label>
+            <input type="date" id="bk-date-to" oninput="filterBookings()" data-testid="input-date-to">
+          </div>
+          <select id="bk-date-field" onchange="filterBookings()" data-testid="select-date-field" data-tip="Apply range to which date">
+            <option value="checkin">on check-in</option>
+            <option value="checkout">on check-out</option>
+            <option value="stay">overlapping stay</option>
+          </select>
+          <div class="dr-presets">
+            <button type="button" class="cal-nav-btn cal-nav-sm" onclick="setDateRangePreset('today')" data-testid="btn-preset-today">Today</button>
+            <button type="button" class="cal-nav-btn cal-nav-sm" onclick="setDateRangePreset('week')" data-testid="btn-preset-week">This week</button>
+            <button type="button" class="cal-nav-btn cal-nav-sm" onclick="setDateRangePreset('month')" data-testid="btn-preset-month">This month</button>
+            <button type="button" class="cal-nav-btn cal-nav-sm" onclick="setDateRangePreset('next30')" data-testid="btn-preset-next30">Next 30d</button>
+            <button type="button" class="cal-nav-btn cal-nav-sm" onclick="setDateRangePreset('clear')" data-testid="btn-preset-clear">Clear</button>
+          </div>
+        </div>
+
         <div class="tbl-wrap bookings-cards">
           <table class="tbl" id="bk-table" data-testid="bookings-table">
             <thead>
@@ -779,8 +842,9 @@ function bookingOnDay(array $bookings, string $date): ?array {
                     <?php endif; ?>
                   </td>
                   <td class="cell-actions" style="white-space:nowrap;">
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="editBooking(<?= (int)$b['id'] ?>)" data-tip="Edit booking" data-testid="btn-edit-<?= $b['id'] ?>"><i class="fa-solid fa-pen-to-square"></i></button>
                     <?php if ($b['status']==='confirmed'): ?>
-                      <form method="POST" style="display:inline;" onsubmit="return confirm('Cancel this booking?')">
+                      <form method="POST" style="display:inline;margin-left:3px;" onsubmit="return confirm('Cancel this booking?')">
                         <input type="hidden" name="action" value="cancel_booking">
                         <input type="hidden" name="id" value="<?= $b['id'] ?>">
                         <button class="btn btn-warn btn-sm" data-testid="btn-cancel-<?= $b['id'] ?>"><i class="fa-solid fa-ban"></i></button>
@@ -964,7 +1028,9 @@ function bookingOnDay(array $bookings, string $date): ?array {
   </div>
   <div class="drawer-body">
     <form method="POST" id="drawerForm">
-      <input type="hidden" name="action" value="add_booking">
+      <input type="hidden" name="action" value="add_booking" id="drawerAction">
+      <input type="hidden" name="id" value="" id="drawer-id">
+      <input type="hidden" name="return_to" value="bookings" id="drawer-return-to">
 
       <!-- Type toggle -->
       <div class="bk-type-toggle" id="bkTypeToggle">
@@ -1103,6 +1169,27 @@ const roomPriceMap = <?= json_encode(
   array_combine(array_keys(ROOM_IDS), array_map(fn($rid) => ROOM_BASE_PRICES[$rid] ?? 0, array_keys(ROOM_IDS)))
 ) ?>;
 
+// ── All bookings (for edit drawer prefill) ───────────────────────
+const bookingMap = <?= json_encode(array_reduce($allBookings ?? [], function($acc, $b) {
+  $acc[(int)$b['id']] = [
+    'id'          => (int)$b['id'],
+    'room_id'     => $b['room_id'],
+    'check_in'    => $b['check_in'],
+    'check_out'   => $b['check_out'],
+    'guest_name'  => $b['guest_name'],
+    'guest_email' => $b['guest_email'],
+    'guest_phone' => $b['guest_phone'],
+    'source'      => $b['source'],
+    'amount'      => (float)$b['amount'],
+    'notes'       => $b['notes'] ?? '',
+    'status'      => $b['status'],
+  ];
+  return $acc;
+}, [])) ?: '{}' ?>;
+
+// ── Current gantt offset (for prev/next nav) ─────────────────────
+const ganttOffset = <?= (int)($ganttOffset ?? 0) ?>;
+
 // ── Sidebar collapse ─────────────────────────────────────────────
 const layoutEl  = document.getElementById('layout');
 const sidebarEl = document.getElementById('sidebar');
@@ -1176,6 +1263,11 @@ function openDrawer(roomId = '', date = '', opts = {}) {
   document.getElementById('bookingDrawer').classList.add('open');
   document.body.style.overflow = 'hidden';
   setBkType('guest');
+  // Reset to fresh "add" state by default
+  document.getElementById('drawerAction').value = 'add_booking';
+  document.getElementById('drawer-id').value    = '';
+  document.getElementById('drawerSubmitBtn').innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save & Notify';
+
   // Quick-direct mode: prefill source=direct, today + tomorrow, scroll-friendly
   if (opts.quick) {
     const today = new Date();
@@ -1204,11 +1296,50 @@ function openDrawer(roomId = '', date = '', opts = {}) {
 
 function openQuickDirect() { openDrawer('', '', { quick: true }); }
 
+function editBooking(id) {
+  const b = bookingMap[id];
+  if (!b) { alert('Booking not found.'); return; }
+  // Open drawer in edit mode
+  document.getElementById('drawerOverlay').classList.add('open');
+  document.getElementById('bookingDrawer').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  const isBlock = b.source === 'blocked';
+  setBkType(isBlock ? 'block' : 'guest');
+  document.getElementById('drawerAction').value = 'update_booking';
+  document.getElementById('drawer-id').value    = b.id;
+  // Return to whichever section we came from (calendar or bookings)
+  const currentSec = document.querySelector('.section-pane.active')?.id?.replace('sec-','') || 'bookings';
+  document.getElementById('drawer-return-to').value = currentSec;
+
+  document.getElementById('drawerTitle').textContent = (isBlock ? 'Edit Block' : 'Edit Booking') + ' #' + b.id;
+  document.getElementById('drawerSub').textContent   = 'Update details, then save.';
+  document.getElementById('drawerSubmitBtn').innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save Changes';
+
+  document.getElementById('drawer-room').value      = b.room_id || '';
+  document.getElementById('drawer-checkin').value   = b.check_in || '';
+  document.getElementById('drawer-checkout').value  = b.check_out || '';
+  document.getElementById('drawer-name').value      = b.guest_name || '';
+  const formEl = document.getElementById('drawerForm');
+  if (formEl.guest_phone) formEl.guest_phone.value = b.guest_phone || '';
+  if (formEl.guest_email) formEl.guest_email.value = b.guest_email || '';
+  if (formEl.notes) formEl.notes.value = b.notes || '';
+  document.getElementById('drawer-amount').value    = b.amount || '';
+  const srcEl = document.getElementById('drawer-source');
+  if (srcEl) srcEl.value = b.source || 'manual';
+  updateNights(); updateAmountHint();
+  setTimeout(() => document.getElementById('drawer-name')?.focus(), 220);
+}
+
 function closeDrawer() {
   document.getElementById('drawerOverlay').classList.remove('open');
   document.getElementById('bookingDrawer').classList.remove('open');
   document.body.style.overflow = '';
   document.getElementById('drawerForm').reset();
+  document.getElementById('drawerAction').value = 'add_booking';
+  document.getElementById('drawer-id').value    = '';
+  document.getElementById('drawerTitle').textContent = 'New Booking';
+  document.getElementById('drawerSub').textContent   = 'Fill in the details below to confirm a reservation';
+  document.getElementById('drawerSubmitBtn').innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save & Notify';
   document.getElementById('nights-display').style.display = 'none';
   document.getElementById('amount-hint').textContent = '';
 }
@@ -1288,21 +1419,73 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ── Bookings search / filter ─────────────────────────────────────
 function filterBookings() {
-  const q      = document.getElementById('bk-search').value.toLowerCase();
-  const room   = document.getElementById('bk-filter-room').value;
-  const src    = document.getElementById('bk-filter-src').value;
-  const status = document.getElementById('bk-filter-status').value;
-  let visible  = 0;
+  const q       = document.getElementById('bk-search').value.toLowerCase();
+  const room    = document.getElementById('bk-filter-room').value;
+  const src     = document.getElementById('bk-filter-src').value;
+  const status  = document.getElementById('bk-filter-status').value;
+  const dFrom   = document.getElementById('bk-date-from')?.value || '';
+  const dTo     = document.getElementById('bk-date-to')?.value   || '';
+  const dField  = document.getElementById('bk-date-field')?.value || 'checkin';
+  let visible   = 0;
   document.querySelectorAll('#bk-table tbody tr').forEach(row => {
+    if (!row.dataset.id) return; // skip empty placeholder row
+    const ci = row.dataset.checkin || '';
+    const co = row.dataset.checkout || '';
+    let dateMatch = true;
+    if (dFrom || dTo) {
+      const lo = dFrom || '0000-01-01';
+      const hi = dTo   || '9999-12-31';
+      if (dField === 'checkin')      dateMatch = (ci >= lo && ci <= hi);
+      else if (dField === 'checkout') dateMatch = (co >= lo && co <= hi);
+      else /* stay overlap */         dateMatch = (ci <= hi && co >= lo);
+    }
     const match = (!q      || (row.dataset.search||'').includes(q))
                && (!room   || row.dataset.room === room)
                && (!src    || row.dataset.src === src)
-               && (!status || row.dataset.status === status);
+               && (!status || row.dataset.status === status)
+               && dateMatch;
     row.style.display = match ? '' : 'none';
     if (match) visible++;
   });
   const cntEl = document.getElementById('bk-result-count');
-  if (cntEl) cntEl.textContent = (q||room||src||status) ? `${visible} result${visible!==1?'s':''}` : '';
+  const anyFilter = q||room||src||status||dFrom||dTo;
+  if (cntEl) cntEl.textContent = anyFilter ? `${visible} result${visible!==1?'s':''}` : '';
+}
+
+// Date range presets
+function setDateRangePreset(kind) {
+  const fromEl = document.getElementById('bk-date-from');
+  const toEl   = document.getElementById('bk-date-to');
+  if (!fromEl || !toEl) return;
+  const today = new Date();
+  const fmt   = d => d.toISOString().split('T')[0];
+  if (kind === 'clear') {
+    fromEl.value = ''; toEl.value = '';
+  } else if (kind === 'today') {
+    fromEl.value = fmt(today); toEl.value = fmt(today);
+  } else if (kind === 'week') {
+    const day = today.getDay(); // 0 = Sun
+    const monday = new Date(today); monday.setDate(today.getDate() - ((day + 6) % 7));
+    const sunday = new Date(monday); sunday.setDate(monday.getDate() + 6);
+    fromEl.value = fmt(monday); toEl.value = fmt(sunday);
+  } else if (kind === 'month') {
+    const first = new Date(today.getFullYear(), today.getMonth(), 1);
+    const last  = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+    fromEl.value = fmt(first); toEl.value = fmt(last);
+  } else if (kind === 'next30') {
+    const next = new Date(today); next.setDate(today.getDate() + 30);
+    fromEl.value = fmt(today); toEl.value = fmt(next);
+  }
+  filterBookings();
+}
+
+// ── Gantt nav: shift past / future ────────────────────────────────
+function ganttShift(offsetDays) {
+  const url = new URL(window.location.href);
+  url.searchParams.set('section', 'calendar');
+  if (offsetDays === 0) url.searchParams.delete('gantt_offset');
+  else                  url.searchParams.set('gantt_offset', offsetDays);
+  window.location.href = url.toString();
 }
 
 // ── Bookings sort ────────────────────────────────────────────────

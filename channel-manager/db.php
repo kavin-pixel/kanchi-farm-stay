@@ -536,6 +536,24 @@ function updateBookingField(int $id, string $field, $value): void {
     getDB()->prepare("UPDATE bookings SET $field=?, updated_at=datetime('now') WHERE id=?")->execute([$value, $id]);
 }
 
+function updateBooking(int $id, array $data): bool {
+    $allowed = [
+        'room_id','room_name','check_in','check_out',
+        'guest_name','guest_email','guest_phone','whatsapp_number',
+        'source','amount','amount_paid','payment_status','status','notes',
+    ];
+    $sets   = [];
+    $params = [];
+    foreach ($allowed as $f) {
+        if (array_key_exists($f, $data)) { $sets[] = "$f = ?"; $params[] = $data[$f]; }
+    }
+    if (!$sets) return false;
+    $sets[] = "updated_at = datetime('now')";
+    $params[] = $id;
+    $sql = "UPDATE bookings SET " . implode(',', $sets) . " WHERE id = ?";
+    return getDB()->prepare($sql)->execute($params);
+}
+
 // ──────────────────────────────────────────────────────────────────
 // EXTERNAL CALENDARS
 // ──────────────────────────────────────────────────────────────────
